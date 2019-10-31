@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <div class="container"><b-alert show dismissible variant="danger">Default Alert</b-alert></div>
     <img alt="Vue logo" src="../assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div>
