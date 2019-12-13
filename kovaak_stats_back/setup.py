@@ -13,6 +13,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'Flask',
+        'Flask-restplus',
     ],
     include_package_data=True,
     data_files=[

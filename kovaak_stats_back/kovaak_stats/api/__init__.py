@@ -1,0 +1,10 @@
+from flask import Blueprint
+from flask_restplus import Api
+
+from kovaak_stats.api.test import api as ns_test
+
+api_bp = Blueprint('api', __name__)
+api = Api(api_bp, version='0.0', title='Kovaak stats viewer API',
+          description='API used by the kovaak stats viewer frontend',
+          doc='/doc')
+api.add_namespace(ns_test)
