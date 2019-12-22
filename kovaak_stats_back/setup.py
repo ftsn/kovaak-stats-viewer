@@ -14,6 +14,8 @@ setup(
     install_requires=[
         'Flask',
         'Flask-restplus',
+        'Flask-sqlalchemy',
+        'Flask-migrate'
     ],
     include_package_data=True,
     data_files=[
