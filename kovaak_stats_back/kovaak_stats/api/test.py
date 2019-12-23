@@ -1,4 +1,7 @@
+from kovaak_stats.app import db
 from flask_restplus import Namespace, Resource, fields
+from kovaak_stats.models.user import User
+
 
 api = Namespace('test', description='test namespace')
 
@@ -10,7 +13,7 @@ test_public_fields = api.model('test', {
 })
 
 test_parser = api.parser()
-test_parser.add_argument('toto', required=True, help='toto field')
+test_parser.add_argument('username', required=True, help='toto field')
 
 @api.route('')
 class Test(Resource):
@@ -19,15 +22,17 @@ class Test(Resource):
     @api.response(200, "Poggers")
     @api.response(400, "Pepehands")
     @api.marshal_with(test_public_fields)
-    def get(self):
+    def post(self):
         """
         Sub documentation
         """
         args = test_parser.parse_args()
-        print(args.toto)
         test_obj = {
             'field1': 'tata',
             'field2': 'titi',
             'field3': 'toto'
         }
+        user = User.create(username=args.username)
+        db.session.commit()
+        print(user)
         return test_obj, 200

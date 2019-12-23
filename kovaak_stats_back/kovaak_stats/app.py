@@ -3,11 +3,11 @@ import sys
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from kovaak_stats.api import api_bp
-
 
 db = SQLAlchemy()
 migrate = Migrate()
+
+from kovaak_stats.api import api_bp
 
 def create_app(name=__name__, config=False):
     application = Flask(name)
@@ -21,7 +21,7 @@ def create_app(name=__name__, config=False):
         'SQLALCHEMY_DATABASE_URI',
         'sqlite:///' + sys.prefix + '/www/kovaak_stats_back/app/michel.db'
     )
-
+    from kovaak_stats.models.user import User
     db.init_app(application)
     migrate.init_app(application, db)
     application.register_blueprint(api_bp, url_prefix='/api')
