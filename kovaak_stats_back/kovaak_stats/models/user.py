@@ -1,5 +1,13 @@
 from kovaak_stats.app import db
 from kovaak_stats.utils.users import hash_pw
+from base64 import b64decode
+from bcrypt import checkpw
+import binascii
+
+
+class AuthenticationError(Exception):
+    """Exception class for every authentication error"""
+    pass
 
 
 class User(db.Model):
@@ -7,6 +15,11 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email_addr = db.Column(db.String(80), unique=True, nullable=False)
     hashed_pw = db.Column(db.String(80), nullable=False)
+
+    # Flask-login
+    _authenticated = False
+    _active = False
+    _anonymous = False
 
     def __repr__(self):
         return 'My id is {} and my name is {}'.format(self.id, self.username)
@@ -19,5 +32,55 @@ class User(db.Model):
         db.session.add(user)
         return user
 
-    def from_db(self, username):
-        self.query.filter_by(username=username).first()
+    @classmethod
+    def from_db(cls, username):
+        return User.query.filter_by(username=username).first()
+
+    @classmethod
+    def from_basic_auth(cls, token):
+        try:
+            decoded = b64decode(token).decode('utf-8').split(':')
+        except (binascii.Error, UnicodeDecodeError):
+            raise AuthenticationError
+        username = decoded[0]
+        password = ':'.join(decoded[1:]).encode('utf-8')
+        user = cls.from_db(username)
+        if not user:
+            return None
+        if checkpw(password, user.hashed_pw.encode('utf-8')):
+            return User
+        return None
+
+    @property
+    def is_authenticated(self):
+        """needed for Flask-Login"""
+        return self._authenticated
+
+    @is_authenticated.setter
+    def is_authenticated(self, value):
+        """needed for Flask-Login"""
+        self._authenticated = value
+
+    @property
+    def is_active(self):
+        """needed for Flask-Login"""
+        return self._active
+
+    @is_active.setter
+    def is_active(self, value):
+        """needed for Flask-Login"""
+        self._active = value
+
+    @property
+    def is_anonymous(self):
+        """needed for Flask-Login"""
+        return self._anonymous
+
+    @is_anonymous.setter
+    def is_anonymous(self, value):
+        """needed for Flask-Login"""
+        self._anonymous = value
+
+    def get_id(self):
+        """needed for Flask-Login"""
+        return self.username
