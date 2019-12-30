@@ -15,7 +15,8 @@ setup(
         'Flask',
         'Flask-restplus',
         'Flask-sqlalchemy',
-        'Flask-migrate'
+        'Flask-migrate',
+        'bcrypt'
     ],
     include_package_data=True,
     data_files=[
