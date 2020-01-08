@@ -7,14 +7,16 @@ from kovaak_stats.utils.users import user_list
 
 api = Namespace('users', description='Users namespace')
 
+
 class UserRestResource(Resource):
     """
     Subclass of Resource with the login_required decorator
     """
     method_decorators = [login_required]
 
+
 user_public_fields = api.model('User', {
-    'username': fields.String(description='The username'),
+    'name': fields.String(description='The username'),
     'email_addr': fields.String(description='The email address'),
 })
 

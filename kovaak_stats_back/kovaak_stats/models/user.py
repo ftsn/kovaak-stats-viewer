@@ -12,7 +12,7 @@ class AuthenticationError(Exception):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    name = db.Column(db.String(80), unique=True, nullable=False)
     email_addr = db.Column(db.String(80), unique=True, nullable=False)
     hashed_pw = db.Column(db.String(80), nullable=False)
 
@@ -22,11 +22,11 @@ class User(db.Model):
     _anonymous = False
 
     def __repr__(self):
-        return 'My id is {} and my name is {}'.format(self.id, self.username)
+        return 'My id is {} and my name is {}'.format(self.id, self.name)
 
     @classmethod
     def create(cls, username, email_addr, clear_pw):
-        user = cls(username=username,
+        user = cls(name=username,
                    email_addr=email_addr,
                    hashed_pw=hash_pw(clear_pw).decode('utf-8'))
         db.session.add(user)
@@ -34,7 +34,7 @@ class User(db.Model):
 
     @classmethod
     def from_db(cls, username):
-        return User.query.filter_by(username=username).first()
+        return User.query.filter_by(name=username).first()
 
     @classmethod
     def from_basic_auth(cls, token):
@@ -83,4 +83,4 @@ class User(db.Model):
 
     def get_id(self):
         """needed for Flask-Login"""
-        return self.username
+        return self.name
