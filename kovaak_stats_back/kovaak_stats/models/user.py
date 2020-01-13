@@ -3,6 +3,7 @@ from kovaak_stats.utils.users import hash_pw
 from base64 import b64decode
 from bcrypt import checkpw
 import binascii
+import datetime
 
 
 class AuthenticationError(Exception):
@@ -12,6 +13,8 @@ class AuthenticationError(Exception):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    creation_date = db.Column(db.DateTime(), default=datetime.datetime.now)
+    modification_date = db.Column(db.DateTime(), default=datetime.datetime.now, onupdate=datetime.datetime.now)
     name = db.Column(db.String(80), unique=True, nullable=False)
     email_addr = db.Column(db.String(80), unique=True, nullable=False)
     hashed_pw = db.Column(db.String(80), nullable=False)

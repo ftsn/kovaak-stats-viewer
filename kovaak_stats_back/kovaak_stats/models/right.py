@@ -1,14 +1,18 @@
 from kovaak_stats.app import db
+import datetime
 
 users_rights = db.Table(
     'users_rights',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('right_id', db.Integer, db.ForeignKey('right.id'), primary_key=True)
+    db.Column('right_id', db.Integer, db.ForeignKey('right.id'), primary_key=True),
+    db.Column('association_time', db.DateTime(), default=datetime.datetime.now)
 )
 
 
 class Right(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    creation_date = db.Column(db.DateTime(), default=datetime.datetime.now)
+    modification_date = db.Column(db.DateTime(), default=datetime.datetime.now, onupdate=datetime.datetime.now)
     name = db.Column(db.String(80), unique=True, nullable=False)
 
     users = db.relationship('User', secondary=users_rights,
