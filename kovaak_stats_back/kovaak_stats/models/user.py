@@ -4,6 +4,7 @@ from base64 import b64decode
 from bcrypt import checkpw
 import binascii
 import datetime
+import jsonpatch
 
 
 class AuthenticationError(Exception):
@@ -29,15 +30,44 @@ class User(db.Model):
 
     @classmethod
     def create(cls, username, email_addr, clear_pw):
+        if cls.exists(username):
+            raise ValueError('The user {} already exists.'.format(username))
         user = cls(name=username,
                    email_addr=email_addr,
                    hashed_pw=hash_pw(clear_pw).decode('utf-8'))
         db.session.add(user)
         return user
 
+    def modify(self, changes):
+        obj = {
+            "name": self.name,
+            "email_addr": self.email_addr,
+            "rights": self.rights_to_list()
+        }
+        patch = jsonpatch.JsonPatch.from_string(changes)
+        patch.apply(obj, in_place=True)
+
+        from kovaak_stats.models.right import Right
+        for right in obj['rights']:
+            if not Right.exists(right):
+                raise ValueError('The right {} doesn\'t exist'.format(right))
+
+        self.name = obj['name']
+        self.email_addr = obj['email_addr']
+        self.rights.clear()
+        for right in obj['rights']:
+            self.add_right_from_string(right)
+
     @classmethod
     def from_db(cls, username):
         return User.query.filter_by(name=username).first()
+
+    @classmethod
+    def exists(cls, name):
+        user = cls.query.filter_by(name=name).first()
+        if user is None:
+            return False
+        return True
 
     @classmethod
     def from_basic_auth(cls, token):
@@ -51,8 +81,31 @@ class User(db.Model):
         if not user:
             return None
         if checkpw(password, user.hashed_pw.encode('utf-8')):
-            return User
+            user.is_authenticated = True
+            return user
         return None
+
+    def has_right(self, name):
+        for right in self.rights:
+            if name == right.name:
+                return True
+        return False
+
+    def rights_to_list(self):
+        rights = []
+        for right in self.rights:
+            rights.append(right.name)
+        return rights
+
+    def add_right_from_string(self, name):
+        from kovaak_stats.models.right import Right
+        right = Right.from_db(name)
+        self.rights.append(right)
+
+    def del_right_from_string(self, name):
+        from kovaak_stats.models.right import Right
+        right = Right.from_db(name)
+        self.rights.remove(right)
 
     @property
     def is_authenticated(self):

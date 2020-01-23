@@ -17,7 +17,9 @@ setup(
         'Flask-sqlalchemy',
         'Flask-migrate',
         'Flask-login',
-        'bcrypt'
+        'bcrypt',
+        'jsonpatch',
+        'jsonpointer'
     ],
     include_package_data=True,
     data_files=[

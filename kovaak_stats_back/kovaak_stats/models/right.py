@@ -30,3 +30,10 @@ class Right(db.Model):
     @classmethod
     def from_db(cls, name):
         return Right.query.filter_by(name=name).first()
+
+    @classmethod
+    def exists(cls, name):
+        right = Right.query.filter_by(name=name).first()
+        if right is None:
+            return False
+        return True

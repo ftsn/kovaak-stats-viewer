@@ -2,6 +2,7 @@ from kovaak_stats.app import db
 from flask_restplus import Namespace, Resource, fields
 from flask_login import login_required
 from kovaak_stats.models.right import Right
+from kovaak_stats.utils import right_needed, Timestamp
 
 
 api = Namespace('rights', description='Rights namespace')
@@ -14,9 +15,14 @@ class RightRestResource(Resource):
     method_decorators = [login_required]
 
 
-right_public_fields = api.model('Right', {
-    'name': fields.String(description='The right\'s name'),
+rights_public_fields = api.model('Right', {
+    'name': fields.String(description='The name of the right'),
+    'creation_time': Timestamp(description='The timestamp of the last user modification',
+                               attribute='creation_date'),
+    'modification_time': Timestamp(description='The timestamp of the last user modification',
+                                   attribute='modification_date')
 })
+
 
 right_parser = api.parser()
 right_parser.add_argument('name', required=True, help='The right\'s name')
@@ -24,20 +30,24 @@ right_parser.add_argument('name', required=True, help='The right\'s name')
 
 @api.route('')
 class Users(RightRestResource):
+    @api.header('Authorization', 'Basic or Bearer', required=True)
     @api.doc(description='Get the right list')
     @api.response(200, "Everything worked.")
-    @api.marshal_list_with(right_public_fields)
+    @api.marshal_list_with(rights_public_fields)
+    @right_needed('rights.get')
     def get(self):
         """
         Get the right list
         """
         return Right.query.all(), 200
 
+    @api.header('Authorization', 'Basic or Bearer', required=True)
     @api.doc(description='Create a new right')
     @api.expect(right_parser)
     @api.response(200, "Everything worked.")
     @api.response(400, "Bad request")
-    @api.marshal_with(right_public_fields)
+    @api.marshal_with(rights_public_fields)
+    @right_needed('rights.create')
     def post(self):
         """
         Create a new right
@@ -50,10 +60,12 @@ class Users(RightRestResource):
 
 @api.route('/<right>')
 class SpecificUser(RightRestResource):
+    @api.header('Authorization', 'Basic or Bearer', required=True)
     @api.doc(description='Gets a specific right')
     @api.response(200, "Everything worked.")
     @api.response(404, "The right doesn't exist.")
-    @api.marshal_with(right_public_fields)
+    @api.marshal_with(rights_public_fields)
+    @right_needed('rights.get')
     def get(self, right):
         """
         Get a specific right
