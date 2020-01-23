@@ -58,7 +58,7 @@ class Users(RightRestResource):
         return right, 200
 
 
-@api.route('/<right>')
+@api.route('/<right_name>')
 class SpecificUser(RightRestResource):
     @api.header('Authorization', 'Basic or Bearer', required=True)
     @api.doc(description='Gets a specific right')
@@ -66,11 +66,26 @@ class SpecificUser(RightRestResource):
     @api.response(404, "The right doesn't exist.")
     @api.marshal_with(rights_public_fields)
     @right_needed('rights.get')
-    def get(self, right):
+    def get(self, right_name):
         """
         Get a specific right
         """
-        right = Right.from_db(right)
+        right = Right.from_db(right_name)
         if not right:
             api.abort(404, 'No such right')
         return right, 200
+
+    @api.doc(description='Delete a specific right')
+    @api.response(204, "Everything worked.")
+    @api.response(404, "The right doesn't exist.")
+    @right_needed('rights.delete')
+    def delete(self, right_name):
+        """
+        Delete a specific right
+        """
+        right = Right.from_db(right_name)
+        if not right:
+            api.abort(404, 'No such right')
+        right.delete()
+        db.session.commit()
+        return '', 204

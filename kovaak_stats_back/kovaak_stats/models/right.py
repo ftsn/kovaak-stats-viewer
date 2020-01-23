@@ -27,6 +27,9 @@ class Right(db.Model):
         db.session.add(right)
         return right
 
+    def delete(self):
+        db.session.delete(self)
+
     @classmethod
     def from_db(cls, name):
         return Right.query.filter_by(name=name).first()

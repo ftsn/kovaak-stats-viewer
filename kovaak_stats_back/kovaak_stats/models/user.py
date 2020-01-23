@@ -32,11 +32,16 @@ class User(db.Model):
     def create(cls, username, email_addr, clear_pw):
         if cls.exists(username):
             raise ValueError('The user {} already exists.'.format(username))
+        if cls.email_addr_exists(email_addr):
+            raise ValueError('The email address {} already exists.'.format(email_addr))
         user = cls(name=username,
                    email_addr=email_addr,
                    hashed_pw=hash_pw(clear_pw).decode('utf-8'))
         db.session.add(user)
         return user
+
+    def delete(self):
+        db.session.delete(self)
 
     def modify(self, changes):
         obj = {
@@ -65,6 +70,13 @@ class User(db.Model):
     @classmethod
     def exists(cls, name):
         user = cls.query.filter_by(name=name).first()
+        if user is None:
+            return False
+        return True
+
+    @classmethod
+    def email_addr_exists(cls, email_addr):
+        user = cls.query.filter_by(email_addr=email_addr).first()
         if user is None:
             return False
         return True

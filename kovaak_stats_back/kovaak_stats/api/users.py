@@ -50,7 +50,7 @@ class Users(UserRestResource):
     @api.expect(user_create_parser)
     @api.response(200, "Everything worked.")
     @api.response(400, "Bad request")
-    @api.marshal_with(user_public_fields)
+    @api.marshal_with(user_public_fields, mask='name, email_addr, creation_time, modification_time')
     @right_needed('users.create')
     def post(self):
         """
@@ -74,7 +74,7 @@ class SpecificUser(UserRestResource):
     @api.doc(description='Get a specific user')
     @api.response(200, "Everything worked.")
     @api.response(404, "The user doesn't exist.")
-    @api.marshal_with(user_public_fields)
+    @api.marshal_with(user_public_fields, mask='name, email_addr, creation_time, modification_time')
     @right_needed('users.get')
     def get(self, username):
         """
@@ -114,6 +114,21 @@ class SpecificUser(UserRestResource):
 
         db.session.commit()
         return user, 200
+
+    @api.doc(description='Delete a specific user')
+    @api.response(204, "Everything worked.")
+    @api.response(404, "The user doesn't exist.")
+    @right_needed('users.delete')
+    def delete(self, username):
+        """
+        Delete a specific user
+        """
+        user = User.from_db(username)
+        if not user:
+            api.abort(404, 'No such user')
+        user.delete()
+        db.session.commit()
+        return '', 204
 
 
 right_add_parser = api.parser()
