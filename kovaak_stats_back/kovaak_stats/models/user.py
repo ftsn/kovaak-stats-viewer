@@ -26,7 +26,7 @@ class User(db.Model):
     _anonymous = False
 
     def __repr__(self):
-        return 'My id is {} and my name is {}'.format(self.id, self.name)
+        return self.name
 
     @classmethod
     def create(cls, username, email_addr, clear_pw):
