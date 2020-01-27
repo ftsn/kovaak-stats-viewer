@@ -31,6 +31,11 @@ setup(
         "Framework :: Flask",
         "Topic :: Scientific/Engineering :: Information Analysis"
     ],
-    test_suite='tests'
+    test_suite='tests',
+    entry_points={
+        'console_scripts': [
+            'kovaak_stats=kovaak_stats.cli:main',
+        ],
+    },
 )
 print(find_packages())
