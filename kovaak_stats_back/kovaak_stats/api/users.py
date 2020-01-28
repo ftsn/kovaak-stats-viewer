@@ -172,12 +172,10 @@ class UserRight(UserRestResource):
         user = User.from_db(username)
         if not user:
             api.abort(404, 'No such user')
-        from kovaak_stats.models.right import Right
-        if not Right.exists(args.name):
-            api.abort(404, 'No such right')
-        if user.has_right(args.name):
-            api.abort(400, 'The user already has this right')
-        user.add_right_from_string(args.name)
+        try:
+            user.add_right_from_string(args.name)
+        except ValueError as e:
+            api.abort(400, 'Couldn\'t add the right {} to {}: {}'.format(args.name, username, e))
         db.session.commit()
 
         return user, 200
@@ -202,9 +200,10 @@ class UserSpecificRight(UserRestResource):
         from kovaak_stats.models.right import Right
         if not Right.exists(right_name):
             api.abort(404, 'No such right')
-        if not user.has_right(right_name):
-            api.abort(400, 'The user doesn\'t have this right')
-        user.del_right_from_string(right_name)
+        try:
+            user.del_right_from_string(right_name)
+        except ValueError as e:
+            api.abort(400, 'Couldn\'t add the right {} to {}: {}'.format(args.name, username, e))
         db.session.commit()
 
         return user, 200

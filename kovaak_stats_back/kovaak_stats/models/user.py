@@ -112,11 +112,19 @@ class User(db.Model):
     def add_right_from_string(self, name):
         from kovaak_stats.models.right import Right
         right = Right.from_db(name)
+        if not right:
+            raise ValueError('{} doesn\'t exist'.format(name))
+        if right in self.rights:
+            raise ValueError('{} already has the right {}'.format(self.name, name))
         self.rights.append(right)
 
     def del_right_from_string(self, name):
         from kovaak_stats.models.right import Right
         right = Right.from_db(name)
+        if not right:
+            raise ValueError('{} doesn\'t exist'.format(name))
+        if right not in self.rights:
+            raise ValueError('{} doesn\'t have the right {}'.format(self.name, name))
         self.rights.remove(right)
 
     @property

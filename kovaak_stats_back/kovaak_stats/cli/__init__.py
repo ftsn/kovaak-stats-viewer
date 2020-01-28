@@ -1,9 +1,11 @@
 from argparse import ArgumentParser
 from kovaak_stats.app import create_app
 from .user import subparser_install as user_subparser
+from .right import subparser_install as right_subparser
 
 MAIN_COMMANDS = [
     ('user', user_subparser),
+    ('right', right_subparser),
 ]
 
 

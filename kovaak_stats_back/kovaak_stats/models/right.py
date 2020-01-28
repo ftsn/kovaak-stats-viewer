@@ -23,6 +23,8 @@ class Right(db.Model):
 
     @classmethod
     def create(cls, name):
+        if cls.exists(name):
+            raise ValueError('The right {} already exists.'.format(name))
         right = cls(name=name)
         db.session.add(right)
         return right
