@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 
+
 db = SQLAlchemy()
 migrate = Migrate()
 
@@ -13,6 +14,8 @@ from kovaak_stats.api import api_bp
 
 def create_app(name=__name__, config=False):
     application = Flask(name)
+    application.config['SECRET_KEY'] = 'totobite'
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
     if not config:
         config = os.environ.get('KOVAAK_STATS_BACK_CONFIG_FILE',
                                 sys.prefix + '/www/kovaak_stats_back/app/app.conf')
@@ -29,6 +32,7 @@ def create_app(name=__name__, config=False):
     login_manager.init_app(application)
     login_manager.user_loader(load_user)
     login_manager.request_loader(request_loader)
+
 
     from kovaak_stats.models.user import User
     from kovaak_stats.models.right import Right

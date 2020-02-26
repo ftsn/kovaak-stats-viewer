@@ -203,7 +203,7 @@ class UserSpecificRight(UserRestResource):
         try:
             user.del_right_from_string(right_name)
         except ValueError as e:
-            api.abort(400, 'Couldn\'t add the right {} to {}: {}'.format(args.name, username, e))
+            api.abort(400, 'Couldn\'t add the right {} to {}: {}'.format(right_name, username, e))
         db.session.commit()
 
         return user, 200

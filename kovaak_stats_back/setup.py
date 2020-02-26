@@ -17,9 +17,11 @@ setup(
         'Flask-sqlalchemy',
         'Flask-migrate',
         'Flask-login',
+        'Flask-session',
         'bcrypt',
         'jsonpatch',
-        'jsonpointer'
+        'jsonpointer',
+        'requests_oauthlib'
     ],
     include_package_data=True,
     data_files=[

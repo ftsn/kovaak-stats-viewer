@@ -3,6 +3,7 @@ from flask_restplus import Api
 
 from kovaak_stats.api.users import api as ns_users
 from kovaak_stats.api.rights import api as ns_rights
+from kovaak_stats.api.auth import api as ns_auth
 
 api_bp = Blueprint('api', __name__)
 api = Api(api_bp, version='0.0', title='Kovaak stats viewer API',
@@ -10,3 +11,5 @@ api = Api(api_bp, version='0.0', title='Kovaak stats viewer API',
           doc='/doc')
 api.add_namespace(ns_users)
 api.add_namespace(ns_rights)
+api.add_namespace(ns_auth)
+

@@ -93,7 +93,7 @@ def specific_user_info(user, **kwargs):
 def specific_user_del(user, **kwargs):
     User.delete(user)
     db.session.commit()
-    print('User {) has been deleted'.format(user.name))
+    print('User {} has been deleted'.format(user.name))
 
 
 def specific_user_modify(user, changes, **kwargs):
