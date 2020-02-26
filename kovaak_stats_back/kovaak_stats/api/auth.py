@@ -32,7 +32,7 @@ class GoogleOauth2(Resource):
 
 
 @api.route('/google-callback')
-class GoogleOauth2(Resource):
+class GoogleOauth2Callback(Resource):
     @api.doc(description='Redirect the user to the OAuth provider')
     def get(self):
         """
