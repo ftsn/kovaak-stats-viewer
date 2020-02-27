@@ -18,7 +18,8 @@ class User(db.Model):
     modification_date = db.Column(db.DateTime(), default=datetime.datetime.now, onupdate=datetime.datetime.now)
     name = db.Column(db.String(80), unique=True, nullable=False)
     email_addr = db.Column(db.String(80), unique=True, nullable=False)
-    hashed_pw = db.Column(db.String(80), nullable=False)
+    hashed_pw = db.Column(db.String(80))
+    google_id = db.Column(db.Boolean)
 
     # Flask-login
     _authenticated = False
@@ -36,7 +37,20 @@ class User(db.Model):
             raise ValueError('The email address {} already exists.'.format(email_addr))
         user = cls(name=username,
                    email_addr=email_addr,
-                   hashed_pw=hash_pw(clear_pw).decode('utf-8'))
+                   hashed_pw=hash_pw(clear_pw).decode('utf-8'),
+                   google_id=False)
+        db.session.add(user)
+        return user
+
+    @classmethod
+    def create_google(cls, email_addr):
+        name = email_addr.split('@')[0]
+        if cls.exists(name):
+            raise ValueError('The user {} already exists.'.format(name))
+        user = cls(name=name,
+                   email_addr=email_addr,
+                   hashed_pw=None,
+                   google_id=True)
         db.session.add(user)
         return user
 
@@ -66,6 +80,10 @@ class User(db.Model):
     @classmethod
     def from_db(cls, username):
         return User.query.filter_by(name=username).first()
+
+    @classmethod
+    def from_db_by_email(cls, email_addr):
+        return User.query.filter_by(email_addr=email_addr).first()
 
     @classmethod
     def exists(cls, name):

@@ -78,7 +78,7 @@ class SpecificUser(RightRestResource):
     @api.doc(description='Delete a specific right')
     @api.response(204, "Everything worked.")
     @api.response(404, "The right doesn't exist.")
-    @right_needed('rights.delete')
+    @right_needed('rights.del')
     def delete(self, right_name):
         """
         Delete a specific right

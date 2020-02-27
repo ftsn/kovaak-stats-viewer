@@ -1,7 +1,11 @@
 from flask import redirect, request, current_app, session
-from flask_restplus import Resource, Namespace
+from flask_restplus import Resource, Namespace, fields
+from flask.json import jsonify
 from requests_oauthlib import OAuth2Session
-import sys
+from kovaak_stats.app import db
+from kovaak_stats.models.user import User
+from kovaak_stats.utils import Timestamp
+import json
 
 
 api = Namespace('auth', description='Authentication namespace')
@@ -15,9 +19,19 @@ scope = [
 ]
 
 
+user_public_fields = api.model('User', {
+    'name': fields.String(description='The username'),
+    'email_addr': fields.String(description='The email address'),
+    'rights': fields.List(fields.String, description='The users\' rights'),
+    'creation_time': Timestamp(description='The timestamp of the last user modification',
+                               attribute='creation_date'),
+    'modification_time': Timestamp(description='The timestamp of the last user modification',
+                                   attribute='modification_date')
+})
+
 @api.route('/google')
 class GoogleOauth2(Resource):
-    @api.doc(description='Redirect the user to the OAuth provider')
+    @api.doc(description='Redirect the user to the OAuth provider.')
     def get(self):
         """
         Redirect the user to the OAuth provider
@@ -33,7 +47,8 @@ class GoogleOauth2(Resource):
 
 @api.route('/google-callback')
 class GoogleOauth2Callback(Resource):
-    @api.doc(description='Redirect the user to the OAuth provider')
+    @api.doc(description='Redirect uri given to the provider.')
+    @api.marshal_with(user_public_fields, mask='name, email_addr, creation_time, modification_time')
     def get(self):
         """
         Redirect the user to the OAuth provider
@@ -46,4 +61,9 @@ class GoogleOauth2Callback(Resource):
         session['oauth_token'] = token
 
         r = google.get('https://www.googleapis.com/oauth2/v1/userinfo')
-        return redirect('http://localhost:8080')
+        content = json.loads(r.content.decode('utf-8'))
+        user = User.from_db_by_email(content['email'])
+        if not user:
+            user = User.create_google(content['email'])
+            db.session.commit()
+        return user, 200

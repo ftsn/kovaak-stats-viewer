@@ -118,7 +118,7 @@ class SpecificUser(UserRestResource):
     @api.doc(description='Delete a specific user')
     @api.response(204, "Everything worked.")
     @api.response(404, "The user doesn't exist.")
-    @right_needed('users.delete')
+    @right_needed('users.del')
     def delete(self, username):
         """
         Delete a specific user
@@ -189,7 +189,7 @@ class UserSpecificRight(UserRestResource):
     @api.response(404, "No such right")
     @api.response(404, "No such user")
     @api.marshal_with(users_rights_public_fields)
-    @right_needed('users.rights_delete')
+    @right_needed('users.rights_del')
     def delete(self, username, right_name):
         """
         Delete a right from a user
