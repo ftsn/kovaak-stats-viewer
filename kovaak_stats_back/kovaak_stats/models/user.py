@@ -21,6 +21,8 @@ class User(db.Model):
     hashed_pw = db.Column(db.String(80))
     google_id = db.Column(db.Boolean)
 
+    recovery_code = db.relationship("RecoveryCode", uselist=False, backref="User")
+
     # Flask-login
     _authenticated = False
     _active = False
@@ -144,6 +146,20 @@ class User(db.Model):
         if right not in self.rights:
             raise ValueError('{} doesn\'t have the right {}'.format(self.name, name))
         self.rights.remove(right)
+
+    def gen_recovery_code(self):
+        from kovaak_stats.models.recovery_code import RecoveryCode
+        if not self.recovery_code:
+            recovery_code = RecoveryCode.create()
+        else:
+            if self.recovery_code.has_expired() is False:
+                return None
+            else:
+                db.session.delete(self.recovery_code)
+                recovery_code = RecoveryCode.create()
+        self.recovery_code = recovery_code
+        db.session.commit()
+        return self.recovery_code.value
 
     @property
     def is_authenticated(self):

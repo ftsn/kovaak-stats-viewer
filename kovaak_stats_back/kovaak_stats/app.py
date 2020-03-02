@@ -33,9 +33,9 @@ def create_app(name=__name__, config=False):
     login_manager.user_loader(load_user)
     login_manager.request_loader(request_loader)
 
-
     from kovaak_stats.models.user import User
     from kovaak_stats.models.right import Right
+    from kovaak_stats.models.recovery_code import RecoveryCode
     db.init_app(application)
     migrate.init_app(application, db)
     application.register_blueprint(api_bp, url_prefix='/api')

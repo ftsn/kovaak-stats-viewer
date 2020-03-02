@@ -1,6 +1,5 @@
 from flask import redirect, request, current_app, session
 from flask_restplus import Resource, Namespace, fields
-from flask.json import jsonify
 from requests_oauthlib import OAuth2Session
 from kovaak_stats.app import db
 from kovaak_stats.models.user import User
@@ -28,6 +27,7 @@ user_public_fields = api.model('User', {
     'modification_time': Timestamp(description='The timestamp of the last user modification',
                                    attribute='modification_date')
 })
+
 
 @api.route('/google')
 class GoogleOauth2(Resource):
@@ -59,11 +59,11 @@ class GoogleOauth2Callback(Resource):
         token = google.fetch_token(token_url, client_secret=client_secret,
                                    authorization_response=request.url)
         session['oauth_token'] = token
-
         r = google.get('https://www.googleapis.com/oauth2/v1/userinfo')
         content = json.loads(r.content.decode('utf-8'))
         user = User.from_db_by_email(content['email'])
         if not user:
             user = User.create_google(content['email'])
             db.session.commit()
-        return user, 200
+
+        return user, 204

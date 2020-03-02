@@ -2,6 +2,7 @@ from kovaak_stats.app import db
 from flask_restplus import Namespace, Resource, fields
 from flask_login import login_required
 from kovaak_stats.models.user import User
+from kovaak_stats.utils.users import hash_pw
 from jsonpointer import JsonPointerException
 from kovaak_stats.utils import right_needed, Timestamp
 import json
@@ -207,3 +208,48 @@ class UserSpecificRight(UserRestResource):
         db.session.commit()
 
         return user, 200
+
+
+recovery_public_fields = api.model('RecoveryCode', {
+    'code': fields.String,
+})
+
+password_recovery_parser = api.parser()
+password_recovery_parser.add_argument('recovery_code', required=True, help='The recovery code')
+password_recovery_parser.add_argument('new_password', required=True, help='The new password')
+
+
+@api.route('/<username>/recover')
+class UserPasswordRecover(Resource):
+    @api.doc(description='Generate a recovery code a user who wants to change his password')
+    @api.response(200, "Everything worked.")
+    @api.response(404, "No such user")
+    @api.marshal_with(recovery_public_fields)
+    def get(self, username):
+        user = User.from_db(username)
+        if not user:
+            api.abort(404, 'No such user')
+        code = user.gen_recovery_code()
+        if not code:
+            api.abort(409, 'A code has already been sent in the last 10 minutes')
+        return {'code': code}, 200
+
+    @api.doc(description='Change the password of the user if the recovery code is correct')
+    @api.expect(password_recovery_parser)
+    @api.response(204, "Everything worked.")
+    @api.response(403, "The recovery code is incorrect or has expired")
+    @api.response(404, "No such user")
+    @api.marshal_with(user_public_fields)
+    def post(self, username):
+        args = password_recovery_parser.parse_args()
+        user = User.from_db(username)
+        if not user:
+            api.abort(404, 'No such user')
+        from kovaak_stats.models.recovery_code import RecoveryCode
+        provided_code = RecoveryCode.from_db(args.recovery_code, user.id)
+        if not provided_code or provided_code.has_expired():
+            api.abort(403, "The recovery code is incorrect or has expired")
+        user.hashed_pw = hash_pw(args.new_password).decode('utf-8')
+        db.session.commit()
+        return '', 204
+
