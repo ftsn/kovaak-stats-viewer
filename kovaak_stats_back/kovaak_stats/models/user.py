@@ -21,7 +21,8 @@ class User(db.Model):
     hashed_pw = db.Column(db.String(80))
     google_id = db.Column(db.Boolean)
 
-    recovery_code = db.relationship("RecoveryCode", uselist=False, backref="User")
+    tokens = db.relationship('Token', backref='user', lazy='subquery', cascade="all, delete-orphan")
+    recovery_code = db.relationship("RecoveryCode", uselist=False, backref="user")
 
     # Flask-login
     _authenticated = False
