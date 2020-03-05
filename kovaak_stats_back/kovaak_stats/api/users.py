@@ -252,4 +252,3 @@ class UserPasswordRecover(Resource):
         user.hashed_pw = hash_pw(args.new_password).decode('utf-8')
         db.session.commit()
         return '', 204
-

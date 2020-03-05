@@ -67,3 +67,69 @@ class GoogleOauth2Callback(Resource):
             db.session.commit()
 
         return user, 204
+
+
+token_create_parser = api.parser()
+token_create_parser.add_argument('username', required=True, help='The username')
+token_create_parser.add_argument('password', required=True, help='The password')
+
+
+@api.route('/token-pair')
+class Token(Resource):
+    @api.doc(description='Get a JWT / refresh token pair')
+    @api.expect(token_create_parser)
+    @api.response(401, "Invalid username/password.")
+    @api.response(403, "The user already has an access token. Refresh the token instead.")
+    @api.response(200, "Everything worked.")
+    def get(self):
+        """
+        Get a JWT / refresh token pair
+        """
+        args = token_create_parser.parse_args()
+        claimed_user = User.from_db_basic(args.username, args.password)
+        if not claimed_user:
+            api.abort(401, "Invalid username/password.")
+        if claimed_user.tokens:
+            api.abort(403, "{} already has an access token. Refresh the token instead.".format(args.username))
+        from kovaak_stats.models.token import Token
+        access_token = Token.create('access', claimed_user)
+        refresh_token = Token.create('refresh')
+        access_token.linked_token = refresh_token.value
+        refresh_token.linked_token = access_token.value
+        claimed_user.tokens.append(access_token)
+        claimed_user.tokens.append(refresh_token)
+        db.session.commit()
+        return {"access_token": access_token.value, "refresh_token": refresh_token.value}, 200
+
+
+token_refresh_parser = api.parser()
+token_refresh_parser.add_argument('refresh_token', required=True, help='The refresh token')
+
+
+@api.route('/<access_token>/refresh')
+class Token(Resource):
+    @api.doc(description='Refresh a user\'s JWT and issues a new refresh token at the same time')
+    @api.expect(token_refresh_parser)
+    @api.response(403, "The access and refresh token aren't paired.")
+    @api.response(403, "The refresh token has expired.")
+    @api.response(200, "Everything worked.")
+    def get(self, access_token):
+        """
+        Refresh a JWT and get a new refresh token
+        """
+        args = token_refresh_parser.parse_args()
+        from kovaak_stats.models.token import Token
+        res_access_token = Token.from_db(access_token)
+        if res_access_token.is_linked(args.refresh_token) is False:
+            api.abort(403, "The access and refresh token aren't paired.")
+        refresh_token = Token.from_db(args.refresh_token)
+        if refresh_token.has_expired():
+            api.abort(403, "The refresh token has expired.")
+        res_access_token.refresh()
+        refresh_token.delete()
+        refresh_token = Token.create('refresh')
+        refresh_token.linked_token = res_access_token.value
+        res_access_token.linked_token = refresh_token.value
+        res_access_token.user.tokens.append(refresh_token)
+        db.session.commit()
+        return {"access_token": access_token.value, "refresh_token": refresh_token.value}, 200

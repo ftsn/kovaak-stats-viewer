@@ -85,6 +85,13 @@ class User(db.Model):
         return User.query.filter_by(name=username).first()
 
     @classmethod
+    def from_db_basic(cls, username, password):
+        user = User.query.filter_by(name=username).first()
+        if not checkpw(password.encode('utf-8'), user.hashed_pw.encode('utf-8')):
+            return None
+        return user
+
+    @classmethod
     def from_db_by_email(cls, email_addr):
         return User.query.filter_by(email_addr=email_addr).first()
 
