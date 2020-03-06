@@ -22,7 +22,8 @@ setup(
         'jsonpatch',
         'jsonpointer',
         'requests_oauthlib',
-        'pyjwt'
+        'pyjwt',
+        'Werkzeug==0.16.1'
     ],
     include_package_data=True,
     data_files=[

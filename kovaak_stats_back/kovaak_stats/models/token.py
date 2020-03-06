@@ -17,7 +17,7 @@ class Token(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     @classmethod
-    def create(cls, token_type, user=None):
+    def create(cls, token_type, username=None):
         if token_type not in ['access', 'refresh']:
             return None
         token = cls()
@@ -28,7 +28,7 @@ class Token(db.Model):
             token.type = 'REFRESH'
         else:
             payload = {
-                'sub': user.name,
+                'sub': username,
                 'iat': datetime.datetime.now(),
                 'exp': datetime.datetime.now() + datetime.timedelta(minutes=int(current_app.config.get('JWT_DURATION')))
             }
@@ -45,6 +45,27 @@ class Token(db.Model):
 
     def delete(self):
         db.session.delete(self)
+
+    @classmethod
+    def create_pair(cls, user):
+        if user.tokens:
+            user.tokens[0].delete()
+            user.tokens[1].delete()
+        access_token = cls.create('access', user.name)
+        refresh_token = cls.create('refresh')
+        access_token.linked_token = refresh_token.value
+        refresh_token.linked_token = access_token.value
+        user.tokens.append(access_token)
+        user.tokens.append(refresh_token)
+        return access_token, refresh_token
+
+    @classmethod
+    def renew_refresh_token(cls, access_token):
+        refresh_token = cls.create('refresh')
+        refresh_token.linked_token = access_token.value
+        access_token.linked_token = refresh_token.value
+        access_token.user.tokens.append(refresh_token)
+        return refresh_token
 
     def is_linked(self, token_value):
         return self.linked_token == token_value

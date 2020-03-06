@@ -3,3 +3,7 @@
 __pycache__/
 dist/
 build/
+htmlcov/
+.eggs/
+.coverage
+.tox/

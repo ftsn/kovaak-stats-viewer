@@ -87,6 +87,7 @@ class SpecificUser(UserRestResource):
         return user, 200
 
     @api.doc(description='Modify a specific user')
+    @api.expect(user_modify_parser)
     @api.response(200, "Everything worked.")
     @api.response(404, "The user doesn't exist.")
     @api.marshal_with(user_public_fields)

@@ -90,14 +90,10 @@ class Token(Resource):
         if not claimed_user:
             api.abort(401, "Invalid username/password.")
         if claimed_user.tokens:
-            api.abort(403, "{} already has an access token. Refresh the token instead.".format(args.username))
+            if claimed_user.tokens[1].has_expired() is False:
+                api.abort(403, "{} already has an access token. Refresh the token instead.".format(args.username))
         from kovaak_stats.models.token import Token
-        access_token = Token.create('access', claimed_user)
-        refresh_token = Token.create('refresh')
-        access_token.linked_token = refresh_token.value
-        refresh_token.linked_token = access_token.value
-        claimed_user.tokens.append(access_token)
-        claimed_user.tokens.append(refresh_token)
+        access_token, refresh_token = Token.create_pair(claimed_user)
         db.session.commit()
         return {"access_token": access_token.value, "refresh_token": refresh_token.value}, 200
 
@@ -127,9 +123,6 @@ class Token(Resource):
             api.abort(403, "The refresh token has expired.")
         res_access_token.refresh()
         refresh_token.delete()
-        refresh_token = Token.create('refresh')
-        refresh_token.linked_token = res_access_token.value
-        res_access_token.linked_token = refresh_token.value
-        res_access_token.user.tokens.append(refresh_token)
+        refresh_token = Token.renew_refresh_token(res_access_token)
         db.session.commit()
         return {"access_token": access_token.value, "refresh_token": refresh_token.value}, 200
