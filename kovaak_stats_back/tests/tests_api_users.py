@@ -125,7 +125,7 @@ class TestApiUsers(TestCaseApi):
         status, data = self.delete('/api/users/non-existent/rights/users.create')
         self.assertEqual(status, 404)
 
-        status, data = self.post('/api/users/non-existent/rights', {'name': 'users.create'})
+        status, data = self.post('/api/users/non-existent/rights', {'rights': 'users.create'})
         self.assertEqual(status, 404)
 
     def test_users_add_and_del_non_existent_right(self):
@@ -133,20 +133,20 @@ class TestApiUsers(TestCaseApi):
         status, data = self.delete('/api/users/toto/rights/non-existent')
         self.assertEqual(status, 404)
 
-        status, data = self.post('/api/users/toto/rights', {'name': 'non.existent'})
+        status, data = self.post('/api/users/toto/rights', {'rights': 'non.existent'})
         self.assertEqual(status, 400)
 
     def test_users_add_and_del_right(self):
         """Test to add and delete a valid right to a valid user"""
         status, data = self.delete('/api/users/toto/rights/users.create')
-        self.assertEqual(status, 200)
+        self.assertEqual(status, 204)
 
-        status, data = self.post('/api/users/toto/rights', {'name': 'users.create'})
-        self.assertEqual(status, 200)
+        status, data = self.post('/api/users/toto/rights', {'rights': 'users.create'})
+        self.assertEqual(status, 204)
 
     def test_users_add_duplicate_right(self):
         """Test to add a right the user already has"""
-        status, data = self.post('/api/users/toto/rights', {'name': 'users.create'})
+        status, data = self.post('/api/users/toto/rights', {'rights': 'users.create'})
         self.assertEqual(status, 400)
 
     def test_users_del_non_owned_right(self):
@@ -193,8 +193,8 @@ class TestApiUsers(TestCaseApi):
         self.assertEqual(status, 200)
         with app.app_context():
             user = User.from_db('toto')
-            user.recovery_code.expiration_date = user.recovery_code.expiration_date - datetime.timedelta(minutes=2)
-            print(user.recovery_code.expiration_date, datetime.datetime.now())
+            delta = datetime.timedelta(minutes=self.app.config.get('RECOVERY_CODE_DURATION'))
+            user.recovery_code.expiration_date = user.recovery_code.expiration_date - delta
             db.session.commit()
 
         status, data = self.post('/api/users/toto/recover', {'recovery_code': code,

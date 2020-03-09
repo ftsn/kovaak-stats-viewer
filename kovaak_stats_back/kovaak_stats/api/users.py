@@ -22,7 +22,6 @@ class UserRestResource(Resource):
 user_public_fields = api.model('User', {
     'name': fields.String(description='The username'),
     'email_addr': fields.String(description='The email address'),
-    'rights': fields.List(fields.String, description='The users\' rights'),
     'creation_time': Timestamp(description='The timestamp of the last user modification',
                                attribute='creation_date'),
     'modification_time': Timestamp(description='The timestamp of the last user modification',
@@ -51,7 +50,7 @@ class Users(UserRestResource):
     @api.expect(user_create_parser)
     @api.response(200, "Everything worked.")
     @api.response(400, "Bad request")
-    @api.marshal_with(user_public_fields, mask='name, email_addr, creation_time, modification_time')
+    @api.marshal_with(user_public_fields)
     @right_needed('users.create')
     def post(self):
         """
@@ -134,7 +133,7 @@ class SpecificUser(UserRestResource):
 
 
 right_add_parser = api.parser()
-right_add_parser.add_argument('name', required=True, help='The right\'s name')
+right_add_parser.add_argument('rights', required=True, help='The right\'s name', action='append')
 
 users_rights_public_fields = api.model('UsersRights', {
     'rights': fields.List(fields.String, attribute='rights'),
@@ -164,7 +163,6 @@ class UserRight(UserRestResource):
     @api.response(400, "The user already has this right.")
     @api.response(400, "No such right")
     @api.response(404, "No such user")
-    @api.marshal_with(users_rights_public_fields)
     @right_needed('users.rights_add')
     def post(self, username):
         """
@@ -175,12 +173,13 @@ class UserRight(UserRestResource):
         if not user:
             api.abort(404, 'No such user')
         try:
-            user.add_right_from_string(args.name)
+            for right_name in args.rights:
+                user.add_right_from_string(right_name)
         except ValueError as e:
-            api.abort(400, 'Couldn\'t add the right {} to {}: {}'.format(args.name, username, e))
+            api.abort(400, e)
         db.session.commit()
 
-        return user, 200
+        return '', 204
 
 
 @api.route('/<username>/rights/<right_name>')
@@ -190,7 +189,6 @@ class UserSpecificRight(UserRestResource):
     @api.response(400, "The user doesn't have this right.")
     @api.response(404, "No such right")
     @api.response(404, "No such user")
-    @api.marshal_with(users_rights_public_fields)
     @right_needed('users.rights_del')
     def delete(self, username, right_name):
         """
@@ -205,10 +203,10 @@ class UserSpecificRight(UserRestResource):
         try:
             user.del_right_from_string(right_name)
         except ValueError as e:
-            api.abort(400, 'Couldn\'t add the right {} to {}: {}'.format(right_name, username, e))
+            api.abort(400, e)
         db.session.commit()
 
-        return user, 200
+        return '', 204
 
 
 recovery_public_fields = api.model('RecoveryCode', {
