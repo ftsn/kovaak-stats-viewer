@@ -25,7 +25,7 @@ rights_public_fields = api.model('Right', {
 
 
 right_parser = api.parser()
-right_parser.add_argument('name', required=True, help='The right\'s name')
+right_parser.add_argument('rights', required=True, help='The rights\' names', action='append')
 
 
 @api.route('')
@@ -50,10 +50,14 @@ class Users(RightRestResource):
     @right_needed('rights.create')
     def post(self):
         """
-        Create a new right
+        Create new rights
         """
         args = right_parser.parse_args()
-        right = Right.create(args.name)
+        try:
+            for right_name in args.rights:
+                right = Right.create(right_name)
+        except ValueError as e:
+            api.abort(400, e)
         db.session.commit()
         return right, 200
 

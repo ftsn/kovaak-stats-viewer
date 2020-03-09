@@ -133,7 +133,7 @@ class SpecificUser(UserRestResource):
 
 
 right_add_parser = api.parser()
-right_add_parser.add_argument('rights', required=True, help='The right\'s name', action='append')
+right_add_parser.add_argument('rights', required=True, help='The rights\' names', action='append')
 
 users_rights_public_fields = api.model('UsersRights', {
     'rights': fields.List(fields.String, attribute='rights'),
@@ -166,7 +166,7 @@ class UserRight(UserRestResource):
     @right_needed('users.rights_add')
     def post(self, username):
         """
-        Add a right to a user
+        Add one or multiple rights to a user
         """
         args = right_add_parser.parse_args()
         user = User.from_db(username)
