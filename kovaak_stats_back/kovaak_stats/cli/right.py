@@ -59,4 +59,3 @@ def specific_right_del(right, **kwargs):
     Right.delete(right)
     db.session.commit()
     print('Right {} has been deleted'.format(right.name))
-

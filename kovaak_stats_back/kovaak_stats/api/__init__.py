@@ -12,4 +12,3 @@ api = Api(api_bp, version='0.0', title='Kovaak stats viewer API',
 api.add_namespace(ns_users)
 api.add_namespace(ns_rights)
 api.add_namespace(ns_auth)
-

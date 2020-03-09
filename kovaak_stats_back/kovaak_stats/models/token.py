@@ -23,8 +23,8 @@ class Token(db.Model):
         token = cls()
         if token_type == 'refresh':
             token.value = secrets.token_urlsafe(40)
-            token.expiration_date = (datetime.datetime.now() +
-                                     datetime.timedelta(days=current_app.config.get('REFRESH_TOKEN_DURATION')))
+            exp = datetime.datetime.now() + datetime.timedelta(days=current_app.config.get('REFRESH_TOKEN_DURATION'))
+            token.expiration_date = exp
             token.type = 'REFRESH'
         else:
             payload = {
@@ -33,8 +33,8 @@ class Token(db.Model):
                 'exp': datetime.datetime.now() + datetime.timedelta(minutes=int(current_app.config.get('JWT_DURATION')))
             }
             token.value = jwt.encode(payload, current_app.config.get('JWT_SECRET')).decode('unicode_escape')
-            token.expiration_date = (datetime.datetime.now() +
-                                     datetime.timedelta(minutes=current_app.config.get('JWT_DURATION')))
+            exp = datetime.datetime.now() + datetime.timedelta(minutes=current_app.config.get('JWT_DURATION'))
+            token.expiration_date = exp
             token.type = 'JWT'
         db.session.add(token)
         return token
@@ -71,8 +71,8 @@ class Token(db.Model):
         return self.linked_token == token_value
 
     def refresh(self):
-        self.expiration_date = (datetime.datetime.now() +
-                                datetime.timedelta(minutes=int(current_app.config.get('JWT_DURATION'))))
+        exp = datetime.datetime.now() + datetime.timedelta(minutes=int(current_app.config.get('JWT_DURATION')))
+        self.expiration_date = exp
 
     def has_expired(self):
         return self.expiration_date < datetime.datetime.now()

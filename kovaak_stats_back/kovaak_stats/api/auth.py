@@ -75,7 +75,7 @@ token_create_parser.add_argument('password', required=True, help='The password')
 
 
 @api.route('/token-pair')
-class Token(Resource):
+class TokenPair(Resource):
     @api.doc(description='Get a JWT / refresh token pair')
     @api.expect(token_create_parser)
     @api.response(401, "Invalid username/password.")
