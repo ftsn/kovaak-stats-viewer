@@ -81,7 +81,7 @@ class TokenPair(Resource):
     @api.response(401, "Invalid username/password.")
     @api.response(403, "The user already has an access token. Refresh the token instead.")
     @api.response(200, "Everything worked.")
-    def get(self):
+    def post(self):
         """
         Get a JWT / refresh token pair
         """
@@ -109,7 +109,7 @@ class Token(Resource):
     @api.response(403, "The access and refresh token aren't paired.")
     @api.response(403, "The refresh token has expired.")
     @api.response(200, "Everything worked.")
-    def get(self, access_token):
+    def post(self, access_token):
         """
         Refresh a JWT and get a new refresh token
         """
@@ -125,4 +125,4 @@ class Token(Resource):
         refresh_token.delete()
         refresh_token = Token.renew_refresh_token(res_access_token)
         db.session.commit()
-        return {"access_token": access_token.value, "refresh_token": refresh_token.value}, 200
+        return {"access_token": res_access_token.value, "refresh_token": refresh_token.value}, 200

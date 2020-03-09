@@ -87,7 +87,7 @@ class User(db.Model):
     @classmethod
     def from_db_basic(cls, username, password):
         user = User.query.filter_by(name=username).first()
-        if not checkpw(password.encode('utf-8'), user.hashed_pw.encode('utf-8')):
+        if not user or not checkpw(password.encode('utf-8'), user.hashed_pw.encode('utf-8')):
             return None
         return user
 

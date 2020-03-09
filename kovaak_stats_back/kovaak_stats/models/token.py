@@ -51,6 +51,7 @@ class Token(db.Model):
         if user.tokens:
             user.tokens[0].delete()
             user.tokens[1].delete()
+            db.session.commit()
         access_token = cls.create('access', user.name)
         refresh_token = cls.create('refresh')
         access_token.linked_token = refresh_token.value
