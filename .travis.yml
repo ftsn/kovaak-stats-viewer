@@ -7,16 +7,8 @@ branches:
     - master
 
 install:
-  - pip install python-coveralls
-  - pip install coverage
-  - pip install tox-travis
+  - pip install tox
 
 script:
   - cd kovaak_stats_back
   - tox
-  - coverage erase
-  - coverage run --source=kovaak_stats --omit='*cli*' setup.py test
-  - coverage report
-
-after_success:
-  - coveralls
