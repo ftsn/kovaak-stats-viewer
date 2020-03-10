@@ -8,12 +8,15 @@ branches:
 
 install:
   - pip install python-coveralls
-  - pip install coverage==4.5.4
-  - pip install tox
+  - pip install coverage
+  - pip install tox-travis
 
 script:
   - cd kovaak_stats_back
   - tox
+  - coverage erase
+  - coverage run --source=kovaak_stats --omit='*cli*' setup.py test
+  - coverage report
 
 after_success:
   - coveralls
