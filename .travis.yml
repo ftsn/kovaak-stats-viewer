@@ -7,8 +7,12 @@ branches:
     - master
 
 install:
+  - pip install python-coveralls
   - pip install tox
 
 script:
   - cd kovaak_stats_back
   - tox
+
+after_success:
+  - coveralls
