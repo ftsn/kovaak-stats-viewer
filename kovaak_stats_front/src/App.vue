@@ -1,10 +1,7 @@
 <template>
-  <div id="app" class="night-mode">
-    <div id="nav">
-      <b-alert variant="success">Toto titi tata</b-alert>
-      <router-link to="/">Home</router-link>
-    </div>
-    <router-view/>
+  <div id="app">
+    <router-view name="sidebar"></router-view>
+    <router-view style="margin-top: 40px;"></router-view>
   </div>
 </template>
 

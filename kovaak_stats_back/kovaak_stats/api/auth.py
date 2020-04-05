@@ -89,9 +89,9 @@ class TokenPair(Resource):
         claimed_user = User.from_db_basic(args.username, args.password)
         if not claimed_user:
             api.abort(401, "Invalid username/password.")
-        if claimed_user.tokens:
-            if claimed_user.tokens[1].has_expired() is False:
-                api.abort(403, "{} already has an access token. Refresh the token instead.".format(args.username))
+        #if claimed_user.tokens:
+        #    if claimed_user.tokens[1].has_expired() is False:
+        #        api.abort(403, "{} already has an access token. Refresh the token instead.".format(args.username))
         from kovaak_stats.models.token import Token
         access_token, refresh_token = Token.create_pair(claimed_user)
         db.session.commit()

@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 import os
 import sys
+from kovaak_stats.utils import after_request
 
 
 db = SQLAlchemy()
@@ -40,4 +41,5 @@ def create_app(name=__name__, config=False):
     db.init_app(application)
     migrate.init_app(application, db)
     application.register_blueprint(api_bp, url_prefix='/api')
+    application.after_request(after_request)
     return application

@@ -29,3 +29,10 @@ def right_needed(rightname):
 class Timestamp(fields.Raw):
     def format(self, value):
         return datetime.timestamp(value)
+
+
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response

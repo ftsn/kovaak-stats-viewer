@@ -2,64 +2,34 @@
     // Import custom font from Google
     // @import url('https://fonts.googleapis.com/css?family=Raleway');
 
-    $body-bg: hsl(210, 20%, 12%);
-    $body-color: hsl(210, 10%, 75%);
-
+    $body-bg: hsl(210, 20%, 10%);
     $link-color: hsl(27, 80%, 45%);
     // Override / set color variables
-    $white: #fff;
-    $black: #000;
-    $green: #000000;
-    $blue: #3399ff;
-    $orange: #f26c22;
-    $yellow: #ffd925;
-    $red: #e5001e;
-
-    // Create grayscale
-    $gray-dark: #292b2c;
-    $gray: #3f3f3f;
-    $gray-light: #7e7e7e;
-    $gray-lighter: #ededed;
-    $gray-lightest: #fafafa;
-
-    // Set brand colors
-    $primary: $blue;
-    $success: $green;
-    $info: $yellow;
-    $warning: $orange;
-    $danger: $red;
-
-    // Override button colors
-    $btn-info-color: darken($info, 45);
-
-    // Override alert background colors
-    $state-success-bg: lighten($success, 30);
-    $state-info-bg: lighten($info, 30);
-    $state-warning-bg: lighten($warning, 30);
-    $state-danger-bg: lighten($danger, 45);
-
-    // Override alert text colors
-    $state-success-text: darken($success, 30);
-    $state-info-text: darken($info, 30);
-    $state-warning-text: darken($warning, 30);
-    $state-danger-text: darken($danger, 10);
-
-    // Override badges padding (doubled because otherwise too crammed)
-    $badge-padding-x: 0.8em;
-    $badge-padding-y: 0.4em;
-
-    // Don't make badges normal instead of bold
-    $badge-font-weight: normal;
-
-    // Override fonts
-    $font-family-sans-serif: 'Raleway', sans-serif;
-    $font-family-serif: Georgia, 'Times New Roman', Times, serif;
-    $font-family-monospace: Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    $font-family-base: $font-family-sans-serif;
-
-    // Set global options
-    $enable-shadows: false;
-    $enable-gradients: true;
+    $gray-100: #212529;
+    $gray-200: #343a40;
+    $gray-300: #495057;
+    $gray-400: #6c757d;
+    $gray-500: #adb5bd;
+    $gray-600: #ced4da;
+    $gray-700: #dee2e6;
+    $gray-800: #e9ecef;
+    $gray-900: #f8f9fa;
+    $white: hsl(210, 20%, 20%);
+    $black: hsl(210, 20%, 70%);
+    $blue: hsl(211, 100%, 50%);
+    $indigo: hsl(262, 90%, 50%);
+    purple: hsl(261, 50%, 50%);
+    $pink: hsl(333, 79%, 58%);
+    $red: hsl(355, 71%, 54%);
+    $orange: hsl(28, 99%, 54%);
+    $yellow: hsl(34, 100%, 52%);
+    $green: hsl(133, 76%, 50%);
+    $teal: hsl(163, 73%, 46%);
+    $cyan: hsl(189, 88%, 41%);
+    $alert-bg-level: -6;
+    $alert-border-level: -5;
+    $alert-color-level: 7;
+    $input-bg: $gray-300;
     @import 'node_modules/bootstrap/scss/bootstrap';
 }
 @import 'node_modules/bootstrap/scss/bootstrap';

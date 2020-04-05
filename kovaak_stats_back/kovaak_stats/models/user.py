@@ -2,9 +2,11 @@ from kovaak_stats.app import db
 from kovaak_stats.utils.users import hash_pw
 from base64 import b64decode
 from bcrypt import checkpw
+from flask import current_app
 import binascii
 import datetime
 import jsonpatch
+import jwt
 
 
 class AuthenticationError(Exception):
@@ -124,6 +126,18 @@ class User(db.Model):
             user.is_authenticated = True
             return user
         return None
+
+    @classmethod
+    def from_bearer_auth(cls, key):
+        try:
+            payload = jwt.decode(key, current_app.config.get('JWT_SECRET'))
+            user = cls.from_db(payload['sub'])
+            if not user:
+                raise AuthenticationError
+            user.is_authenticated = True
+            return user
+        except jwt.DecodeError:
+            raise AuthenticationError
 
     def has_right(self, name):
         for right in self.rights:

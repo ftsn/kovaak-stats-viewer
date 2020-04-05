@@ -16,6 +16,8 @@ def request_loader(request):
     try:
         if method == 'Basic':
             return User.from_basic_auth(token)
+        elif method == 'Bearer':
+            return User.from_bearer_auth(token)
         else:
             abort(400)
     except AuthenticationError:
