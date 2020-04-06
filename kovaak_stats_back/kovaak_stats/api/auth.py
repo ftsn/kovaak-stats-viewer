@@ -4,6 +4,7 @@ from requests_oauthlib import OAuth2Session
 from kovaak_stats.app import db
 from kovaak_stats.models.user import User
 from kovaak_stats.utils import Timestamp
+from datetime import datetime
 import json
 
 
@@ -95,7 +96,16 @@ class TokenPair(Resource):
         from kovaak_stats.models.token import Token
         access_token, refresh_token = Token.create_pair(claimed_user)
         db.session.commit()
-        return {"access_token": access_token.value, "refresh_token": refresh_token.value}, 200
+        tokens = {
+            "access_token": {
+                "value": access_token.value
+            },
+            "refresh_token": {
+                "value": refresh_token.value,
+                "expiration_time": datetime.timestamp(refresh_token.expiration_date)
+            }
+        }
+        return tokens, 200
 
 
 token_refresh_parser = api.parser()

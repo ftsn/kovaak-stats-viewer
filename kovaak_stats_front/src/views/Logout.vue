@@ -7,14 +7,22 @@
 </template>
 
 <script>
+    import names from "../store/auth_names"
+    import {mapActions} from "vuex";
+
     export default {
         name: 'logout',
         data() {
             return {
             }
         },
+        methods: {
+            ...mapActions('auth', {
+                'logout': names.AUTH_LOGOUT
+            }),
+        },
         mounted() {
-            this.$store.dispatch('LOGOUT')
+            this.logout()
                 .then(() => {
                     this.$router.replace('/login').catch(err => { console.log(err) })
                 })

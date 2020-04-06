@@ -38,7 +38,10 @@
 </template>
 
 <script>
- export default {
+import names from "../store/auth_names"
+import { mapActions } from "vuex"
+
+export default {
      name: 'login',
      data() {
      	return {
@@ -49,6 +52,9 @@
 	 	}
      },
      methods: {
+     	...mapActions('auth', {
+			'login': names.AUTH_REQUEST,
+		}),
 		validate() {
 			this.error = null;
 	     	this.isValidated = true;
@@ -60,7 +66,7 @@
 	     	};
 
 	     	if (form.checkValidity() === true) {
-				this.$store.dispatch('LOGIN', payload).then(() => {
+				this.login(payload).then(() => {
 					this.$router.push('/')
 				}).catch((error) => {
 					if (error.request.status === 401) {
