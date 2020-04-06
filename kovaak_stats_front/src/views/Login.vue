@@ -73,7 +73,7 @@ export default {
 						this.error = 'Invalid username/password.';
 					}
 					else {
-						this.error = 'There was an error during authentication.';
+						this.error = 'There was an error during the authentication.';
 					}
 				})
 			}

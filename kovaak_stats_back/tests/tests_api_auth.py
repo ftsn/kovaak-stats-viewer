@@ -47,7 +47,7 @@ class TestApiAuth(TestCaseApi):
         """Test to refresh the access token with a wrong refresh token"""
         status, data = self.post('/api/auth/token-pair', {'username': 'toto',
                                                           'password': 'titi'})
-        access_token = data['access_token']
+        access_token = data['access_token']['value']
 
         status, data = self.post('/api/auth/{}/refresh'.format(access_token), {'refresh_token': 'not-linked'})
         self.assertEqual(status, 403)
@@ -56,8 +56,8 @@ class TestApiAuth(TestCaseApi):
         """Test to refresh an access token with an expired refresh token"""
         status, data = self.post('/api/auth/token-pair', {'username': 'toto',
                                                           'password': 'titi'})
-        access_token = data['access_token']
-        refresh_token = data['refresh_token']
+        access_token = data['access_token']['value']
+        refresh_token = data['refresh_token']['value']
         with app.app_context():
             user = User.from_db('toto')
             delta = datetime.timedelta(days=self.app.config.get('REFRESH_TOKEN_DURATION'))
@@ -71,8 +71,8 @@ class TestApiAuth(TestCaseApi):
         """Test to refresh an access token"""
         status, data = self.post('/api/auth/token-pair', {'username': 'toto',
                                                           'password': 'titi'})
-        access_token = data['access_token']
-        refresh_token = data['refresh_token']
+        access_token = data['access_token']['value']
+        refresh_token = data['refresh_token']['value']
 
         status, data = self.post('/api/auth/{}/refresh'.format(access_token), {'refresh_token': refresh_token})
         self.assertEqual(status, 200)
