@@ -46,12 +46,14 @@ class Users(UserRestResource):
         """
         return User.query.all(), 200
 
+
+@api.route('')
+class UsersCreate(Resource):
     @api.doc(description='Create a new user')
     @api.expect(user_create_parser)
     @api.response(200, "Everything worked.")
     @api.response(400, "Bad request")
     @api.marshal_with(user_public_fields)
-    @right_needed('users.create')
     def post(self):
         """
         Create a new user

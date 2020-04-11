@@ -15,14 +15,14 @@
 
 		    <b-input-group class="mb-3">
 				<b-input-group-text slot="prepend"><i class="fas fa-user"></i></b-input-group-text>
-				<b-form-input type="text" v-model="username" placeholder="Username" aria-label="Username" aria-describedby="username" required></b-form-input>
+				<b-form-input type="text" v-model="username" placeholder="Username" aria-label="Username" required></b-form-input>
 				<div class="invalid-feedback">Your username.</div>
 		    </b-input-group>
 
 		    <b-form-group description="BLABLA MES COUILLES LINK POUR RESET LE PASSWORD.">
 				<b-input-group>
 					<b-input-group-text slot="prepend"><i class="fas fa-lock"></i></b-input-group-text>
-			    	<b-form-input type="password" v-model="password" placeholder="Password" aria-label="Password" aria-describedby="password" required></b-form-input>
+			    	<b-form-input type="password" v-model="password" placeholder="Password" aria-label="Password" required></b-form-input>
 			    	<div class="invalid-feedback">Your password.</div>
 				</b-input-group>
 		    </b-form-group>

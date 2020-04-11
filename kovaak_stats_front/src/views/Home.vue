@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <b-button v-on:click="toggleDarkMode" variant="warning">ta race putain {{ access_token }} {{ isAuthenticated }}</b-button><br />
-    <b-button v-on:click="toggleDarkMode" variant="warning"> {{ username }} {{ status }}</b-button><br />
+    <b-button v-on:click="toggleDarkMode" variant="warning"> {{ username }} {{ status }} {{api_url}}</b-button><br />
     <button v-on:click="getUsersPoggers">get stp bg</button>
     <div class="container">
       <b-alert show dismissible variant="primary">Default Alert</b-alert>
@@ -29,6 +29,11 @@ export default {
   components: {
     HelloWorld
   },
+  data() {
+    return {
+      api_url: process.env.VUE_APP_API_URL
+    }
+  },
   computed: {
     ...mapState('auth', [
             'access_token',
@@ -45,6 +50,7 @@ export default {
       html_div.classList.toggle("night-mode");
     },
     getUsersPoggers: function () {
+      console.log(process.env.VUE_APP_API_URL)
       axios.get('http://0.0.0.0:9999/api/users')
               .then(resp => {
                 console.log(resp.data)

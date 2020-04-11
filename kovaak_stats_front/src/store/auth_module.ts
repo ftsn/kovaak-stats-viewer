@@ -44,7 +44,7 @@ const auth = {
         [names.AUTH_REQUEST]: ({commit, dispatch}, user) => {
             return new Promise((resolve, reject) => {
                 commit(names.AUTH_REQUEST)
-                axios.post('http://0.0.0.0:9999/api/auth/token-pair', user)
+                axios.post(process.env.VUE_APP_API_URL + 'auth/token-pair', user)
                     .then(resp => {
                         localStorage.setItem('access-token', resp.data.access_token.value)
                         localStorage.setItem('refresh-token', resp.data.refresh_token.value)

@@ -23,6 +23,9 @@ const ifAuthenticated = (to, from, next) => {
 const Home = () => import('../views/Home.vue')
 const Login = () => import('../views/Login.vue')
 const Logout = () => import('../views/Logout.vue')
+const Signup = () => import('../views/Signup.vue')
+const Manage = () => import('../views/Manage.vue')
+const ManageUsers = () => import('../views/ManageUsers.vue')
 const PageNotFound = () => import('../components/PageNotFound.vue')
 const Sidebar = () => import('../components/Sidebar.vue')
 
@@ -48,13 +51,33 @@ const routes = [
         beforeEnter: ifAuthenticated
     },
     {
+        path: '/signup',
+        name: 'signup',
+        component: Signup,
+        beforeEnter: ifNotAuthenticated
+    },
+    {
+        path: '/manage/',
+        name: 'manage',
+        component: Manage,
+        beforeEnter: ifAuthenticated,
+        children: [
+            {
+                path: 'users',
+                name: 'users',
+                component: ManageUsers
+            }
+        ]
+    },
+    {
         path: "*",
         component: PageNotFound
     }
 ]
 
 const router = new VueRouter({
-  routes
+    mode: 'history',
+    routes
 })
 
 export default router
