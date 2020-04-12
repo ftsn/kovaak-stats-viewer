@@ -1,4 +1,4 @@
 # kovaak-stats-viewer
 
 API:  
-![Build status](https://api.travis-ci.com/ftsn/kovaak-stats-viewer.svg?branch=master)
+[![Build Status](https://travis-ci.org/ftsn/kovaak-stats-viewer.svg?branch=master)](https://travis-ci.org/ftsn/kovaak-stats-viewer)
