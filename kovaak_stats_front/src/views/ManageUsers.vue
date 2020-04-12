@@ -3,7 +3,7 @@
         <b-alert :variant="alertVariant" dismissible :show="!!alertMessage">
             {{ alertMessage }}
         </b-alert>
-
+        
         <b-row>
             <b-col md="6" class="my-1">
                 <b-form-group horizontal label="Filter" class="mb-0">
@@ -66,10 +66,12 @@
                  :sort-desc.sync="sortDesc"
                  :sort-direction="sortDirection"
                  @filtered="onFiltered">
-            <template slot="creation_time" slot-scope="row">{{ row.value }}</template>
-            <template slot="modification_time" slot-scope="row">{{ row.value }}</template>
+            <template v-slot:cell(creation_time)="data">{{ timestampToDate(data.item.creation_time) }}</template>
+            <template v-slot:cell(modification_time)="data">{{ timestampToDate(data.item.modification_time) }}</template>
             <template v-slot:cell(rights)="data">
-                <p>data</p>
+                <b-list-group>
+                    <b-list-group-item v-for="right in data.item.rights">{{right}}</b-list-group-item>
+                </b-list-group>
             </template>
             <template v-slot:cell(actions)="row">
                 <b-button variant="outline-primary" size="sm" class="mr-2" @click.stop="showModif(row)">
@@ -122,8 +124,18 @@
                         </b-form-invalid-feedback>
                     </b-form-group>
 
+                    <b-form-group label="Select and unselect the rights you want" label-for="rights">
+                        <b-form-select v-model="modifData[row.item.name].rights" id="rights" :options="rightsOptions(rightlist, row.item.rights)" :value="null" size="lg" multiple :select-size="10">
+                            <template slot="first">
+                                <!-- this slot appears above the options from 'options' prop -->
+                                <option :value="null" disabled>-- Rights of the user --</option>
+                            </template>
+                        </b-form-select>
+                    </b-form-group>
+
                     <b-button :disabled="!validation_username(row) || !validation_email_addr(row)"
                               type="submit" variant="primary" class="mr-2">Modify</b-button>
+                    <b-button @click="resetModifForm(row)" variant="outline-danger">Reset</b-button>
                 </b-form>
             </template>
         </b-table>
@@ -139,11 +151,14 @@
 
 <script>
     import axios from "axios";
+    import { hasRight, timestampToDate, isIn } from "../utils";
 
     export default {
         name: "ManageUsers",
         data() {
             return {
+                hasRight: hasRight,
+                timestampToDate: timestampToDate,
                 alertVariant: 'primary',
                 alertMessage: null,
                 busy: false,
@@ -165,8 +180,20 @@
                 ],
                 deleteState: false,
                 modifData: {},
-                reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
+                reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
+                rightlist: [],
             }
+        },
+        created() {
+            axios.get(process.env.VUE_APP_API_URL + 'rights')
+                .then(resp => {
+                    this.rightlist = resp.data
+                    this.rightlist = this.toRightList(resp.data)
+                })
+                .catch(error => {
+                    this.alertVariant = 'danger';
+                    this.alertMessage = error.response ? error.response.data.message : error;
+                })
         },
         computed: {
             sortOptions () {
@@ -174,21 +201,28 @@
             },
         },
         methods: {
+            rightsOptions (rightsArray, usersRights) {
+                return rightsArray.map(f => { return { text: f, value: f, selected: isIn(f, usersRights) } })
+            },
+            toRightList (objList) {
+                return objList.map(f => { return f.name })
+            },
             validation_username(row) {
                 if (this.modifData[row.item.name].username !== null) {
-                    if (this.modifData[row.item.name].username.length < 3)
-                        return false
-                    return true
+                    return this.modifData[row.item.name].username.length >= 3;
                 }
                 return null
             },
             validation_email_addr(row) {
                 if (this.modifData[row.item.name].email_addr !== null) {
-                    if (this.reg.test(this.modifData[row.item.name].email_addr))
-                        return true
-                    return false
+                    return this.reg.test(this.modifData[row.item.name].email_addr);
                 }
                 return null
+            },
+            resetModifForm(row) {
+                this.modifData[row.item.name].username = row.item.name
+                this.modifData[row.item.name].email_addr = row.item.email_addr
+                this.modifData[row.item.name].rights = row.item.rights
             },
             showModif(row) {
                 row.toggleDetails();
@@ -196,6 +230,7 @@
                     this.$set(this.modifData, row.item.name, {
                         'username': row.item.name,
                         'email_addr': row.item.email_addr,
+                        'rights': row.item.rights
                     });
                 }
 
@@ -244,7 +279,8 @@
                 if (this.validation_username(row) && this.validation_email_addr(row)) {
                     const changes = [
                         { "op": "replace", "path": "/name", "value": this.modifData[row.item.name].username },
-                        { "op": "replace", "path": "/email_addr", "value": this.modifData[row.item.name].email_addr }
+                        { "op": "replace", "path": "/email_addr", "value": this.modifData[row.item.name].email_addr },
+                        { "op": "replace", "path": "/rights", "value": this.modifData[row.item.name].rights}
                     ]
                     const payload = {
                         'changes': JSON.stringify(changes)

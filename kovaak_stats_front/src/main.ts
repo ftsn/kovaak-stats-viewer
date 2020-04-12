@@ -5,6 +5,7 @@ import router from './router'
 import store from './store'
 import BootstrapVue from 'bootstrap-vue'
 import axios from 'axios'
+import { initNightMode } from './utils'
 
 Vue.use(BootstrapVue)
 import './custom.scss'
@@ -14,6 +15,7 @@ const token = localStorage.getItem('access-token')
 if (token) {
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
 }
+initNightMode()
 
 new Vue({
   router,

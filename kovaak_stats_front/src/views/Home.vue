@@ -1,8 +1,8 @@
 <template>
   <div class="home">
-    <b-button v-on:click="toggleDarkMode" variant="warning">ta race putain {{ access_token }} {{ isAuthenticated }}</b-button><br />
-    <b-button v-on:click="toggleDarkMode" variant="warning"> {{ username }} {{ status }} {{api_url}}</b-button><br />
-    <button v-on:click="getUsersPoggers">get stp bg</button>
+    <b-button v-on:click="toggleNightMode" variant="warning">ta race putain {{ access_token }} {{ isAuthenticated }}</b-button><br />
+    <b-button v-on:click="toggleNightMode" variant="warning"> {{ username }} {{ status }} {{api_url}}</b-button><br />
+    <button v-on:click="getUsersPoggers">get stp bg {{night_mode}}</button>
     <div class="container">
       <b-alert show dismissible variant="primary">Default Alert</b-alert>
       <b-alert show dismissible variant="secondary">Default Alert</b-alert>
@@ -21,6 +21,7 @@
 <script>
 // @ is an alias to /src
 import HelloWorld from '@/components/HelloWorld.vue'
+import { hasRight, toggleNightMode } from "../utils";
 import axios from "axios"
 import { mapState, mapGetters } from "vuex"
 
@@ -31,6 +32,7 @@ export default {
   },
   data() {
     return {
+      toggleNightMode: toggleNightMode,
       api_url: process.env.VUE_APP_API_URL
     }
   },
@@ -40,17 +42,17 @@ export default {
             'username',
             'status'
     ]),
+    ...mapState('main', [
+            'night_mode',
+    ]),
     ...mapGetters('auth', [
             'isAuthenticated'
     ])
   },
   methods: {
-    toggleDarkMode: function () {
-      let html_div = document.getElementsByTagName('html')[0];
-      html_div.classList.toggle("night-mode");
-    },
     getUsersPoggers: function () {
       console.log(process.env.VUE_APP_API_URL)
+      console.log(hasRight('users.create'))
       axios.get('http://0.0.0.0:9999/api/users')
               .then(resp => {
                 console.log(resp.data)
