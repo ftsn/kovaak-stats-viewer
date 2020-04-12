@@ -10,6 +10,7 @@ const auth = {
         refresh_token: localStorage.getItem('refresh-token') || '',
         refresh_token_exp: null,
         username: null,
+        rights: [],
         status: '',
     },
     mutations: {
@@ -21,6 +22,7 @@ const auth = {
             state.access_token = tokens.access_token.value
             state.access_token_exp = tokens.decoded_jwt.exp
             state.username = tokens.decoded_jwt.sub
+            state.rights = tokens.decoded_jwt.rights
             state.refresh_token = tokens.refresh_token.value
             state.refresh_token_exp = tokens.refresh_token.expiration_time
         },

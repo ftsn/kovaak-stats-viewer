@@ -27,8 +27,12 @@ class Token(db.Model):
             token.expiration_date = exp
             token.type = 'REFRESH'
         else:
+            from kovaak_stats.models.user import User
+            user = User.from_db(username)
+            rightlist = list(map(lambda x: x.name, user.rights))
             payload = {
                 'sub': username,
+                'rights': rightlist,
                 'iat': datetime.datetime.now(),
                 'exp': datetime.datetime.now() + datetime.timedelta(minutes=int(current_app.config.get('JWT_DURATION')))
             }

@@ -22,6 +22,7 @@ class UserRestResource(Resource):
 user_public_fields = api.model('User', {
     'name': fields.String(description='The username'),
     'email_addr': fields.String(description='The email address'),
+    'rights': fields.List(fields.String, description='The users\' rights'),
     'creation_time': Timestamp(description='The timestamp of the last user modification',
                                attribute='creation_date'),
     'modification_time': Timestamp(description='The timestamp of the last user modification',
@@ -38,7 +39,7 @@ user_create_parser.add_argument('password', required=True, help='The password')
 class Users(UserRestResource):
     @api.doc(description='Get the user list')
     @api.response(200, "Everything worked.")
-    @api.marshal_list_with(user_public_fields, mask='name, email_addr, creation_time, modification_time')
+    @api.marshal_list_with(user_public_fields)
     @right_needed('users.get')
     def get(self):
         """
@@ -76,7 +77,7 @@ class SpecificUser(UserRestResource):
     @api.doc(description='Get a specific user')
     @api.response(200, "Everything worked.")
     @api.response(404, "The user doesn't exist.")
-    @api.marshal_with(user_public_fields, mask='name, email_addr, creation_time, modification_time')
+    @api.marshal_with(user_public_fields)
     @right_needed('users.get')
     def get(self, username):
         """
