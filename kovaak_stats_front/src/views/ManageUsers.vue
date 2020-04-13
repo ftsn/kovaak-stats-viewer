@@ -3,7 +3,7 @@
         <b-alert :variant="alertVariant" dismissible :show="!!alertMessage">
             {{ alertMessage }}
         </b-alert>
-        
+
         <b-row>
             <b-col md="6" class="my-1">
                 <b-form-group horizontal label="Filter" class="mb-0">
@@ -95,7 +95,7 @@
                             <strong>This action can't be reverted</strong><br>
                             Don't check the box unless you are absolutely sure you want to delete this user.
                         </b-alert>
-                        <b-form-checkbox @change="deleteUser(row.item.name, 'userPopoverTrigger-' + row.index)"
+                        <b-form-checkbox @change="deleteUser(row.item.name, 'userDeletePopover-' + row.index)"
                                          v-model="deleteState"
                                          class="mb-2">
                             Delete the user

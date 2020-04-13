@@ -31,4 +31,4 @@ function timestampToDate (value) {
     return moment(value * 1000).format('DD/MM/YYYY HH:mm:ss')
 }
 
-export { isIn, hasRight, applyNightMode, initNightMode, timestampToDate }
+export { isIn, hasRight, applyNightMode, initNightMode, toggleNightMode, timestampToDate }
