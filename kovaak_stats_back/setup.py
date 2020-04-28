@@ -21,9 +21,9 @@ setup(
         'bcrypt',
         'jsonpatch',
         'jsonpointer',
-        'requests_oauthlib',
         'pyjwt',
-        'Werkzeug==0.16.1'
+        'Werkzeug==0.16.1',
+        'oauth2client'
     ],
     include_package_data=True,
     data_files=[

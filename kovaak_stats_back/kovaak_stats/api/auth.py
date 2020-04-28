@@ -1,11 +1,13 @@
-from flask import redirect, request, current_app, session
+from flask import current_app
 from flask_restplus import Resource, Namespace, fields
-from requests_oauthlib import OAuth2Session
 from kovaak_stats.app import db
 from kovaak_stats.models.user import User
 from kovaak_stats.utils import Timestamp
 from datetime import datetime
+from oauth2client import client
+from kovaak_stats.models.token import Token as TokenModel
 import json
+import requests
 
 
 api = Namespace('auth', description='Authentication namespace')
@@ -17,6 +19,7 @@ scope = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile"
 ]
+fetch_info_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
 
 
 user_public_fields = api.model('User', {
@@ -30,44 +33,56 @@ user_public_fields = api.model('User', {
 })
 
 
-@api.route('/google')
-class GoogleOauth2(Resource):
-    @api.doc(description='Redirect the user to the OAuth provider.')
-    def get(self):
-        """
-        Redirect the user to the OAuth provider
-        """
-        client_id = current_app.config.get('GOOGLE_CLIENT_ID')
-        google = OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri)
-        authorization_url, state = google.authorization_url(authorization_base_url,
-                                                            access_type="offline", prompt="select_account")
-        # State is used to prevent CSRF, keep this for later.
-        session['oauth_state'] = state
-        return redirect(authorization_url)
+google_user_public_fields = api.model('GoogleUser', {
+    'name': fields.String(description='The username'),
+    'access_token': fields.String(description='The access token'),
+    'rights': fields.List(fields.String, description='The users\' rights'),
+})
 
 
-@api.route('/google-callback')
-class GoogleOauth2Callback(Resource):
-    @api.doc(description='Redirect uri given to the provider.')
-    @api.marshal_with(user_public_fields, mask='name, email_addr, creation_time, modification_time')
-    def get(self):
+google_tokens_parser = api.parser()
+google_tokens_parser.add_argument('auth', required=True, help='The auth code')
+
+
+@api.route('/google-tokens')
+class GoogleOauth2Tokens(Resource):
+    @api.doc(description='Fetch a pair of google tokens and create, if needed, the corresponding new user in db')
+    @api.response(200, "Everything worked.")
+    @api.response(400, "Can't get the tokens")
+    @api.marshal_with(google_user_public_fields)
+    def post(self):
         """
-        Redirect the user to the OAuth provider
+        Get a google token pair
         """
+        args = google_tokens_parser.parse_args()
         client_id = current_app.config.get('GOOGLE_CLIENT_ID')
         client_secret = current_app.config.get('GOOGLE_CLIENT_SECRET')
-        google = OAuth2Session(client_id, state=session['oauth_state'], redirect_uri=redirect_uri)
-        token = google.fetch_token(token_url, client_secret=client_secret,
-                                   authorization_response=request.url)
-        session['oauth_token'] = token
-        r = google.get('https://www.googleapis.com/oauth2/v1/userinfo')
+        auth_code = args.auth
+        try:
+            credentials = client.credentials_from_code(client_id, client_secret, scope='', code=auth_code)
+        except client.FlowExchangeError as e:
+            api.abort(400, e)
+
+        r = requests.get('{}?access_token={}'.format(fetch_info_url, credentials.access_token))
         content = json.loads(r.content.decode('utf-8'))
         user = User.from_db_by_email(content['email'])
         if not user:
-            user = User.create_google(content['email'])
-            db.session.commit()
-
-        return user, 204
+            try:
+                user = User.create_google(content['email'])
+            except ValueError as e:
+                api.abort(400, 'Cannot create the user. More information: {}'.format(e))
+        TokenModel.create_pair(user,
+                               raw_access={
+                                   'type': 'access-google',
+                                   'value': credentials.access_token,
+                                   'expiration_date': credentials.token_expiry
+                               },
+                               raw_refresh={
+                                   'type': 'refresh-google',
+                                   'value': credentials.refresh_token
+                               })
+        db.session.commit()
+        return {'name': user.name, 'access_token': credentials.access_token, 'rights': user.rights}, 200
 
 
 token_create_parser = api.parser()
@@ -93,8 +108,7 @@ class TokenPair(Resource):
         #if claimed_user.tokens:
         #    if claimed_user.tokens[1].has_expired() is False:
         #        api.abort(403, "{} already has an access token. Refresh the token instead.".format(args.username))
-        from kovaak_stats.models.token import Token
-        access_token, refresh_token = Token.create_pair(claimed_user)
+        access_token, refresh_token = TokenModel.create_pair(claimed_user)
         db.session.commit()
         tokens = {
             "access_token": {
@@ -124,15 +138,14 @@ class Token(Resource):
         Refresh a JWT and get a new refresh token
         """
         args = token_refresh_parser.parse_args()
-        from kovaak_stats.models.token import Token
-        res_access_token = Token.from_db(access_token)
+        res_access_token = TokenModel.from_db(access_token)
         if res_access_token.is_linked(args.refresh_token) is False:
             api.abort(403, "The access and refresh token aren't paired.")
-        refresh_token = Token.from_db(args.refresh_token)
+        refresh_token = TokenModel.from_db(args.refresh_token)
         if refresh_token.has_expired():
             api.abort(403, "The refresh token has expired.")
         res_access_token.refresh()
         refresh_token.delete()
-        refresh_token = Token.renew_refresh_token(res_access_token)
+        refresh_token = TokenModel.renew_refresh_token(res_access_token)
         db.session.commit()
         return {"access_token": res_access_token.value, "refresh_token": refresh_token.value}, 200

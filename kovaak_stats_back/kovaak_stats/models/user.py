@@ -130,17 +130,13 @@ class User(db.Model):
 
     @classmethod
     def from_bearer_auth(cls, key):
-        try:
-            payload = jwt.decode(key, current_app.config.get('JWT_SECRET'))
-            user = cls.from_db(payload['sub'])
-            if not user:
-                raise AuthenticationError
-            user.is_authenticated = True
-            return user
-        except jwt.DecodeError:
+        from kovaak_stats.models.token import Token
+        token = Token.query.filter_by(value=key).first()
+        if not token:
             raise AuthenticationError
-        except jwt.exceptions.ExpiredSignatureError:
-            raise AuthenticationError
+        user = User.query.filter_by(id=token.user_id).first()
+        user.is_authenticated = True
+        return user
 
     def has_right(self, name):
         for right in self.rights:

@@ -4,6 +4,13 @@ import datetime
 import secrets
 import jwt
 
+TOKEN_TYPES = [
+    'jwt',
+    'refresh',
+    'access-google',
+    'refresh-google',
+]
+
 
 class Token(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -17,16 +24,26 @@ class Token(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     @classmethod
-    def create(cls, token_type, username=None):
-        if token_type not in ['access', 'refresh']:
+    def create(cls, token_type, username=None, raw_token=None):
+        if token_type not in TOKEN_TYPES:
             return None
         token = cls()
+        if raw_token:
+            if 'expiration_date' in raw_token:
+                token = cls(value=raw_token['value'],
+                            type=token_type,
+                            expiration_date=raw_token['expiration_date'])
+            else:
+                token = cls(value=raw_token['value'],
+                            type=token_type)
+            db.session.add(token)
+            return token
         if token_type == 'refresh':
             token.value = secrets.token_urlsafe(40)
             exp = datetime.datetime.now() + datetime.timedelta(days=current_app.config.get('REFRESH_TOKEN_DURATION'))
             token.expiration_date = exp
-            token.type = 'REFRESH'
-        else:
+            token.type = token_type
+        elif token_type == 'jwt':
             from kovaak_stats.models.user import User
             user = User.from_db(username)
             rightlist = list(map(lambda x: x.name, user.rights))
@@ -39,7 +56,7 @@ class Token(db.Model):
             token.value = jwt.encode(payload, current_app.config.get('JWT_SECRET')).decode('unicode_escape')
             exp = datetime.datetime.now() + datetime.timedelta(minutes=current_app.config.get('JWT_DURATION'))
             token.expiration_date = exp
-            token.type = 'JWT'
+            token.type = token_type
         db.session.add(token)
         return token
 
@@ -51,13 +68,17 @@ class Token(db.Model):
         db.session.delete(self)
 
     @classmethod
-    def create_pair(cls, user):
+    def create_pair(cls, user, raw_access=None, raw_refresh=None):
         if user.tokens:
             user.tokens[0].delete()
             user.tokens[1].delete()
             db.session.commit()
-        access_token = cls.create('access', user.name)
-        refresh_token = cls.create('refresh')
+        if raw_access and raw_refresh:
+            access_token = cls.create(raw_access['type'], raw_token=raw_access)
+            refresh_token = cls.create(raw_refresh['type'], raw_token=raw_refresh)
+        else:
+            access_token = cls.create('jwt', username=user.name)
+            refresh_token = cls.create('refresh')
         access_token.linked_token = refresh_token.value
         refresh_token.linked_token = access_token.value
         user.tokens.append(access_token)

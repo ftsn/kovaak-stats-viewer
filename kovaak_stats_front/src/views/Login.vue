@@ -9,9 +9,9 @@
 		<h5 slot="header">Connection</h5>
 
 		<b-form id="loginform" ref="loginform" v-on:submit.prevent="validate" v-bind:class="{ 'was-validated': isValidated }" role="form" novalidate>
-		    <b-alert variant="danger" dismissible :show="!!error">
-			{{ error }}
-		    </b-alert>
+			<b-alert :variant="alertVariant" dismissible :show="!!alertMessage">
+				{{ alertMessage }}
+			</b-alert>
 
 		    <b-input-group class="mb-3">
 				<b-input-group-text slot="prepend"><i class="fas fa-user"></i></b-input-group-text>
@@ -27,6 +27,10 @@
 				</b-input-group>
 		    </b-form-group>
 
+			<div class="mb-3">
+				<b-link @click="authGoogle">Or login via google</b-link>
+			</div>
+
 		    <b-button type="submit" variant="primary" block>Login</b-button>
 		</b-form>
 
@@ -40,21 +44,34 @@
 <script>
 import names from "../store/auth_names"
 import { mapActions } from "vuex"
+import axios from "axios";
 
 export default {
-     name: 'login',
-     data() {
-     	return {
-     		'username': null,
+	name: 'login',
+	data() {
+		return {
+			'username': null,
 	     	'password': null,
 	     	'isValidated': false,
-	     	'error': null,
-	 	}
-     },
-     methods: {
-     	...mapActions('auth', {
+			alertVariant: 'primary',
+			alertMessage: null,
+		}
+	},
+	methods: {
+		...mapActions('auth', {
 			'login': names.AUTH_REQUEST,
+			'google_login': names.GOOGLE_AUTH_REQUEST
 		}),
+		authGoogle() {
+			this.google_login({vm: this})
+					.then(() => {
+						this.$router.push('/dashboard').catch((err) => {});
+					})
+					.catch((error) => {
+						this.alertVariant = 'danger';
+						this.alertMessage = 'There was an error during the authentication.'
+					})
+		},
 		validate() {
 			this.error = null;
 	     	this.isValidated = true;
@@ -66,19 +83,23 @@ export default {
 	     	};
 
 	     	if (form.checkValidity() === true) {
-				this.login(payload).then(() => {
-					this.$router.push('/').catch((err) => {});
-				}).catch((error) => {
-					if (error.request.status === 401) {
-						this.error = 'Invalid username/password.';
-					}
-					else {
-						this.error = 'There was an error during the authentication.';
-					}
-				})
-			}
-	 	}
-     }
+	     		this.login(payload)
+						.then(() => {
+							this.$router.push('/dashboard').catch((err) => {});
+						})
+						.catch((error) => {
+							if (error.request.status === 401) {
+								this.alertVariant = 'danger';
+								this.alertMessage = error.response ? error.response.data.message : error;
+							}
+							else {
+								this.alertVariant = 'danger';
+								this.alertMessage = 'There was an error during the authentication.'
+							}
+						})
+	     	}
+		}
+	}
  };
 </script>
 
