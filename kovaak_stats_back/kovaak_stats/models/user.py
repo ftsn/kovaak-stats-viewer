@@ -24,6 +24,7 @@ class User(db.Model):
     google_id = db.Column(db.Boolean)
 
     tokens = db.relationship('Token', backref='user', lazy='subquery', cascade="all, delete-orphan")
+    stats = db.relationship('Stat', backref='user', lazy='subquery', cascade="all, delete-orphan")
     recovery_code = db.relationship("RecoveryCode", uselist=False, backref="user")
 
     # Flask-login
@@ -137,6 +138,8 @@ class User(db.Model):
             user.is_authenticated = True
             return user
         except jwt.DecodeError:
+            raise AuthenticationError
+        except jwt.exceptions.ExpiredSignatureError:
             raise AuthenticationError
 
     def has_right(self, name):

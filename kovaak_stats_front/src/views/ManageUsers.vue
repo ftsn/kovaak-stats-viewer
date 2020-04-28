@@ -1,5 +1,5 @@
 <template>
-    <b-container>
+    <div>
         <b-alert :variant="alertVariant" dismissible :show="!!alertMessage">
             {{ alertMessage }}
         </b-alert>
@@ -47,12 +47,12 @@
         </b-row>
         <br>
         <b-table ref="usersTable"
+                 responsive
                  hover
-                 bordered
+                 borderless
                  striped
                  caption="User list"
                  show-empty
-                 stacked="md"
                  no-provider-paging
                  no-provider-sorting
                  no-provider-filtering
@@ -69,16 +69,18 @@
             <template v-slot:cell(creation_time)="data">{{ timestampToDate(data.item.creation_time) }}</template>
             <template v-slot:cell(modification_time)="data">{{ timestampToDate(data.item.modification_time) }}</template>
             <template v-slot:cell(rights)="data">
-                <b-list-group>
-                    <b-list-group-item v-for="right in data.item.rights">{{right}}</b-list-group-item>
-                </b-list-group>
+                <div class="rights_list_group">
+                    <b-list-group>
+                        <b-list-group-item v-for="right in data.item.rights" v-bind:key="right">{{right}}</b-list-group-item>
+                    </b-list-group>
+                </div>
             </template>
             <template v-slot:cell(actions)="row">
-                <b-button variant="outline-primary" size="sm" class="mr-2" @click.stop="showModif(row)">
+                <b-button variant="outline-primary" size="sm" class="m-2" @click.stop="showModif(row)">
                     <i class="fas fa-pen"></i>
                 </b-button>
 
-                <b-button variant="outline-danger" size="sm" :id="'userDeletePopover-' + row.index" click.stop=''>
+                <b-button variant="outline-danger" class="m-2" size="sm" :id="'userDeletePopover-' + row.index" click.stop=''>
                     <i class="fas fa-trash-alt"></i>
                 </b-button>
                 <b-popover :target="'userDeletePopover-' + row.index"
@@ -102,7 +104,6 @@
                         </b-form-checkbox>
                     </div>
                 </b-popover>
-
             </template>
 
             <template v-slot:row-details="row">
@@ -146,7 +147,7 @@
             </b-col>
         </b-row>
 
-    </b-container>
+    </div>
 </template>
 
 <script>
@@ -173,8 +174,8 @@
                 fieldsUsers: [
                     { key: 'name', label: 'Username', sortable: true, sortDirection: 'desc' },
                     { key: 'email_addr', label: 'Email address', sortable: true, sortDirection: 'desc' },
-                    { key: 'creation_time', label: 'Creation date', sortable: true, 'class': 'text-center' },
-                    { key: 'modification_time', label: 'Modification date', sortable: true, 'class': 'text-center' },
+                    { key: 'creation_time', label: 'Creation date', sortable: true },
+                    { key: 'modification_time', label: 'Modification date', sortable: true },
                     { key: 'rights', label: 'Rights' },
                     { key: 'actions', label: 'Actions', 'class': 'text-center'},
                 ],
@@ -303,5 +304,8 @@
 </script>
 
 <style scoped>
-
+    .rights_list_group {
+        overflow: auto;
+        max-height: 150px;
+    }
 </style>

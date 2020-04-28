@@ -2,9 +2,13 @@ from kovaak_stats.app import db
 from flask_restplus import Namespace, Resource, fields
 from flask_login import login_required
 from kovaak_stats.models.user import User
+from kovaak_stats.utils import get_current_user
 from kovaak_stats.utils.users import hash_pw
 from jsonpointer import JsonPointerException
 from kovaak_stats.utils import right_needed, Timestamp
+from kovaak_stats.utils.users import format_users_stats
+from werkzeug.datastructures import FileStorage
+from datetime import datetime
 import json
 import jsonpatch
 
@@ -254,3 +258,61 @@ class UserPasswordRecover(Resource):
         user.hashed_pw = hash_pw(args.new_password).decode('utf-8')
         db.session.commit()
         return '', 204
+
+
+upload_parser = api.parser()
+upload_parser.add_argument('files', location='files', type=FileStorage, required=True, action='append')
+
+get_stats_parser = api.parser()
+get_stats_parser.add_argument('scenarii', help='Will only return the stats for these scenarii', action='append')
+get_stats_parser.add_argument('start', help='Won\'t return any stats for sessions done before this timestamp')
+get_stats_parser.add_argument('end', help='Won\'t return any stats for sessions done after this timestamp')
+
+
+@api.route('/<username>/stats')
+class UserStats(Resource):
+    @api.doc(description='Return the stats associated to a certain user')
+    @api.expect(get_stats_parser)
+    @api.response(200, "Everything worked.")
+    @api.response(404, "No such user")
+    def get(self, username):
+        args = get_stats_parser.parse_args()
+        user = User.from_db(username)
+        if not user:
+            api.abort(404, 'No such user')
+        if not get_current_user().has_right('stats.get') and get_current_user().name != username:
+            api.abort(403, 'You don\'t have the proper right or try to access the stats of someone else')
+        try:
+            start = datetime.fromtimestamp(int(args.start)) if args.start else datetime.fromtimestamp(0)
+            end = datetime.fromtimestamp(int(args.end)) if args.end else datetime.fromtimestamp(2147483647)
+        except TypeError:
+            api.abort(400, "Invalid value, a timestamp is expected")
+        from kovaak_stats.models.stat import Stat
+        if args.scenarii:
+            stats = Stat.query.filter_by(user_id=user.id).filter(Stat.scenario.in_(args.scenarii),
+                                                                 Stat.creation_date >= start,
+                                                                 Stat.creation_date <= end).order_by(Stat.execution_date).all()
+        else:
+            stats = Stat.query.filter_by(user_id=user.id).filter(Stat.creation_date >= start,
+                                                                 Stat.creation_date <= end).order_by(Stat.execution_date).all()
+        return format_users_stats(stats), 200
+
+    @api.doc(description='Parse the stats from the files sent with the request and add them to a corresponding user')
+    @api.expect(upload_parser)
+    @api.response(204, "Everything worked.")
+    @api.response(400, "Error while processing a stat file")
+    @api.response(404, "No such user")
+    def post(self, username):
+        args = upload_parser.parse_args()
+        user = User.from_db(username)
+        if not user:
+            api.abort(404, 'No such user')
+        from kovaak_stats.models.stat import Stat
+        for file in args.files:
+            try:
+                Stat.create(file, user)
+            except ValueError as e:
+                api.abort(400, e)
+        db.session.commit()
+        return '', 204
+

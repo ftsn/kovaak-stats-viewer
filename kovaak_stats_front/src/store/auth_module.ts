@@ -39,7 +39,7 @@ const auth = {
         },
     },
     getters: {
-        isAuthenticated: state => !!state.access_token,
+        isAuthenticated: state => !!(state.access_token && parseInt(state.access_token_exp) * 1000 > Date.now()),
         authStatus: state => state.status,
     },
     actions: {

@@ -2,8 +2,9 @@
     // Import custom font from Google
     // @import url('https://fonts.googleapis.com/css?family=Raleway');
 
-    $body-bg: hsl(210, 20%, 10%);
-    $link-color: hsl(27, 80%, 45%);
+    //$body-bg: hsl(210, 20%, 10%);
+    $body-bg: rgb(34, 37, 42);
+
     // Override / set color variables
     $gray-100: #212529;
     $gray-200: #343a40;
@@ -18,7 +19,7 @@
     $black: hsl(210, 20%, 70%);
     $blue: hsl(211, 100%, 50%);
     $indigo: hsl(262, 90%, 50%);
-    purple: hsl(261, 50%, 50%);
+    $purple: hsl(261, 50%, 50%);
     $pink: hsl(333, 79%, 58%);
     $red: hsl(355, 71%, 54%);
     $orange: hsl(28, 99%, 54%);
@@ -26,11 +27,38 @@
     $green: hsl(133, 76%, 50%);
     $teal: hsl(163, 73%, 46%);
     $cyan: hsl(189, 88%, 41%);
-    $alert-bg-level: -6;
-    $alert-border-level: -5;
-    $alert-color-level: 7;
+    $alert-bg-level: -9;
+    $alert-border-level: 1;
+    $alert-color-level: 3;
     $input-bg: $gray-300;
+
+    $primary: hsl(27, 80%, 45%);
+
+    $table-bg: rgb(45, 48, 53);
+    $table-color: rgb(138, 141, 147);
+
+    $list-group-bg: rgb(45, 48, 53);
+
+    $card-cap-bg:                       rgb(38, 40, 43); //39,40,43
+    $card-cap-color:                    rgb(138, 141, 147);
+    $card-color:                        rgb(138, 141, 147);
+    $card-bg:                           rgb(44, 47, 51);
+
+    $dropdown-bg: rgb(44, 47, 51);
+
+    $input-bg: rgb(58, 63, 69);
     @import 'node_modules/bootstrap/scss/bootstrap';
+
+    .sectionCollapse > div:first-child:hover {
+        background-color: $gray-100;
+        cursor: pointer;
+    }
 }
+
 @import 'node_modules/bootstrap/scss/bootstrap';
 @import 'node_modules/bootstrap-vue/src/index.scss';
+
+.sectionCollapse > div:first-child:hover {
+    background-color: $gray-100;
+    cursor: pointer;
+}

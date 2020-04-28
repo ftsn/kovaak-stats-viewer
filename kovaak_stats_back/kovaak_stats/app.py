@@ -38,6 +38,7 @@ def create_app(name=__name__, config=False):
     from kovaak_stats.models.right import Right
     from kovaak_stats.models.recovery_code import RecoveryCode
     from kovaak_stats.models.token import Token
+    from kovaak_stats.models.stat import Stat
     db.init_app(application)
     migrate.init_app(application, db)
     application.register_blueprint(api_bp, url_prefix='/api')

@@ -2,8 +2,8 @@
     <b-container>
         <b-alert variant="warning" show>
             Page not found.
-            <router-link to="/login" v-if="!this.$store.getters.isAuthenticated" class="alert-link"> Login.</router-link>
-            <router-link to="/" v-if="this.$store.getters.isAuthenticated" class="alert-link"> Go back to the main page.</router-link>
+            <router-link to="/login" v-if="!this.$store.getters['auth/isAuthenticated']" class="alert-link"> Login.</router-link>
+            <router-link to="/" v-if="this.$store.getters['auth/isAuthenticated']" class="alert-link"> Go back to the main page.</router-link>
         </b-alert>
     </b-container>
 </template>

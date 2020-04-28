@@ -75,26 +75,22 @@
                 if (this.password !== null && this.same_password !== null) {
                     if (this.password !== this.same_password)
                         return false
-                    else if (this.password.length < 6)
-                        return false
                     else
-                        return true
+                        return this.password.length >= 6;
                 }
                 return null
             },
             validation_username() {
                 if (this.username !== null) {
-                    if (this.username.length < 3)
-                        return false
-                    return true
+                    return this.username.length >= 3;
+
                 }
                 return null
             },
             validation_email_addr() {
                 if (this.email_addr !== null) {
-                    if (this.reg.test(this.email_addr))
-                        return true
-                    return false
+                    return this.reg.test(this.email_addr);
+
                 }
                 return null
             },

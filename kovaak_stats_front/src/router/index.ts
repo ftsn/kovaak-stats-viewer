@@ -27,6 +27,7 @@ const Signup = () => import('../views/Signup.vue')
 const Manage = () => import('../views/Manage.vue')
 const ManageUsers = () => import('../views/ManageUsers.vue')
 const ManageRights = () => import('../views/ManageRights.vue')
+const Dashboard = () => import('../views/Dashboard.vue')
 const PageNotFound = () => import('../components/PageNotFound.vue')
 const Sidebar = () => import('../components/Sidebar.vue')
 
@@ -60,20 +61,38 @@ const routes = [
     {
         path: '/manage/',
         name: 'manage',
-        component: Manage,
+        components: {
+            default: Manage,
+            sidebar: Sidebar
+        },
         beforeEnter: ifAuthenticated,
         children: [
             {
                 path: 'users',
                 name: 'users',
-                component: ManageUsers
+                components: {
+                    default: ManageUsers,
+                    sidebar: Sidebar
+                }
             },
             {
                 path: 'rights',
                 name: 'rights',
-                component: ManageRights
+                components: {
+                    default: ManageRights,
+                    sidebar: Sidebar
+                }
             }
         ]
+    },
+    {
+        path: '/dashboard',
+        name: 'dashboard',
+        components: {
+            default: Dashboard,
+            sidebar: Sidebar,
+        },
+        beforeEnter: ifAuthenticated
     },
     {
         path: "*",
