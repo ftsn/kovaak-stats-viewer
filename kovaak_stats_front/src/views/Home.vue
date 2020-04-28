@@ -1,47 +1,39 @@
 <template>
-  <div class="home">
-    <b-button v-on:click="toggleNightMode" variant="warning">ta race putain {{ access_token }} {{ isAuthenticated }}</b-button><br />
-    <b-button v-on:click="toggleNightMode" variant="warning"> {{ username }} {{ status }} {{api_url}} {{ Date.now() }}</b-button><br />
-    <button v-on:click="getUsersPoggers">get stp bg {{night_mode}}</button>
-    <b-jumbotron class="full-page">
-      <template v-slot:header>BootstrapVue</template>
+  <div>
+    <div class="bg-filler"></div>
+  <b-row align-h="center" class="home m-0">
+    <b-col cols="4" offset="8" class="text-right pt-2">
+      <b-button @click="toggleNightMode" v-if="!night_mode" variant="outline-secondary" size="sm"><i class="far fa-moon"></i></b-button>
+      <b-button @click="toggleNightMode" v-else variant="outline-secondary" size="sm"><i class="fas fa-sun"></i></b-button>
+    </b-col>
+    <b-col>
+    <b-jumbotron class="full-page mb-0" fluid>
+      <template v-slot:header>Kovaak stats viewer</template>
 
       <template v-slot:lead>
-        This is a simple hero unit, a simple jumbotron-style component for calling extra attention to
-        featured content or information.
+        Register an account, upload your stats files and analyze your gameplay
       </template>
 
       <hr class="my-4">
 
-      <p>
-        It uses utility classes for typography and spacing to space content out within the larger
-        container.
-      </p>
-
-      <b-button variant="primary" href="#">Do Something</b-button>
-      <b-button variant="success" href="#">Do Something Else</b-button>
+      <h5 class="mb-4">
+        It only takes a few clicks to get ready
+      </h5>
+      <div class="text-center">
+        <router-link to="/login"><b-button variant="outline-dark" class="mr-2 mb-2" size="lg">Sign-in</b-button></router-link>
+        <router-link to="/signup"><b-button variant="primary" class="mr-2 mb-2" size="lg">Sign-up</b-button></router-link>
+      </div>
     </b-jumbotron>
-    <div class="container">
-      <b-alert show dismissible variant="primary">Default Alert</b-alert>
-      <b-alert show dismissible variant="secondary">Default Alert</b-alert>
-      <b-alert show dismissible variant="success">Default Alert</b-alert>
-      <b-alert show dismissible variant="info">Default Alert</b-alert>
-      <b-alert show dismissible variant="warning">Default Alert</b-alert>
-      <b-alert show dismissible variant="danger">Default Alert</b-alert>
-      <b-alert show dismissible variant="light">Default Alert</b-alert>
-      <b-alert show dismissible variant="dark">Default Alert</b-alert>
-    </div>
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    </b-col>
+  </b-row>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import HelloWorld from '@/components/HelloWorld.vue'
-import { hasRight, toggleNightMode } from "../utils";
-import axios from "axios"
-import { mapState, mapGetters } from "vuex"
+import {mapState} from "vuex";
+import { toggleNightMode } from "../utils";
 
 export default {
   name: 'home',
@@ -51,41 +43,35 @@ export default {
   data() {
     return {
       toggleNightMode: toggleNightMode,
-      api_url: process.env.VUE_APP_API_URL
     }
   },
   computed: {
-    ...mapState('auth', [
-            'access_token',
-            'username',
-            'status'
-    ]),
     ...mapState('main', [
-            'night_mode',
-    ]),
-    ...mapGetters('auth', [
-            'isAuthenticated'
+      'night_mode'
     ])
   },
-  methods: {
-    getUsersPoggers: function () {
-      console.log(process.env.VUE_APP_API_URL)
-      console.log(hasRight('users.create'))
-      axios.get('http://0.0.0.0:9999/api/users')
-              .then(resp => {
-                console.log(resp.data)
-              })
-              .catch(err => {
-                console.log("échec cuisant sa mere")
-              })
-    }
-  }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
+  .home {
+    height: 100vh;
+  }
+  .bg-filler {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    background-image: url("../assets/fps_aim_trainer_logo.png");
+    background-size: cover;
+    opacity: 0.25;
+  }
+  .night-mode {
+    .bg-filler {
+      opacity: 0.09;
+    }
+  }
   .full-page {
-    min-height: 80vh;
+    background-color: transparent;
   }
 </style>

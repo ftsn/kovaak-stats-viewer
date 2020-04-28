@@ -1,17 +1,15 @@
 <template>
-	<div style="margin-bottom: 65px;">
+	<div style="margin-bottom: 75px;">
 		<b-navbar class="main-navbar" fixed="top" toggleable="md" :type="night_mode ? '' : 'light'" :variant="night_mode ? '' : 'light'">
 			<b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
 			<b-navbar-brand href="/"><i class="fas fa-chart-line"></i> Kovaak stats viewer</b-navbar-brand>
 		  	<b-collapse is-nav id="nav_collapse">
 	      	<!-- Right aligned nav items -->
 				<b-navbar-nav class="ml-auto">
-					<b-nav-item right class="p-0" @click="toggleNightMode" v-if="!night_mode"><b-button variant="outline-primary" size="sm"><i class="far fa-moon"></i> Night mode</b-button></b-nav-item>
-					<b-nav-item right class="p-0" @click="toggleNightMode" v-else><b-button variant="outline-secondary" size="sm"><i class="far fa-sun"></i> Light mode</b-button></b-nav-item>
 				  	<b-nav-item-dropdown right>
 						<!-- Using button-content slot -->
 						<template slot="button-content">
-							<i class="fas fa-user"></i> {{username}}
+							<b-avatar size="sm"></b-avatar> {{username}}
 					  	</template>
 						<b-dropdown-item><router-link to="/dashboard">Stats dashboard</router-link></b-dropdown-item>
 						<b-dropdown-divider></b-dropdown-divider>
@@ -20,6 +18,8 @@
 						<b-dropdown-divider></b-dropdown-divider>
 						<b-dropdown-item><router-link to="/logout">Logout</router-link></b-dropdown-item>
 				  	</b-nav-item-dropdown>
+					<b-nav-item right class="p-0" @click="toggleNightMode" v-if="!night_mode"><b-button variant="outline-primary" size="sm"><i class="far fa-moon"></i></b-button></b-nav-item>
+					<b-nav-item right class="p-0" @click="toggleNightMode" v-else><b-button variant="outline-secondary" size="sm"><i class="fas fa-sun"></i></b-button></b-nav-item>
 			  	</b-navbar-nav>
 		  	</b-collapse>
 	  	</b-navbar>

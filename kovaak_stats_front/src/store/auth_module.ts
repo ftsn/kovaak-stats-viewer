@@ -51,7 +51,7 @@ const auth = {
                         localStorage.setItem('access-token', resp.data.access_token.value)
                         localStorage.setItem('refresh-token', resp.data.refresh_token.value)
                         const decoded_jwt = jwt_decode(resp.data.access_token.value)
-                        axios.defaults.headers.common['Authorization'] = ' Bearer ' + resp.data.access_token
+                        axios.defaults.headers.common['Authorization'] = ' Bearer ' + resp.data.access_token.value
                         commit(names.AUTH_SUCCESS, {
                             'access_token': resp.data.access_token,
                             'decoded_jwt': decoded_jwt,

@@ -67,7 +67,7 @@ export default {
 
 	     	if (form.checkValidity() === true) {
 				this.login(payload).then(() => {
-					this.$router.push('/')
+					this.$router.push('/').catch((err) => {});
 				}).catch((error) => {
 					if (error.request.status === 401) {
 						this.error = 'Invalid username/password.';

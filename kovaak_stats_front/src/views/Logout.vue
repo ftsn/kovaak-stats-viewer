@@ -24,7 +24,7 @@
         mounted() {
             this.logout()
                 .then(() => {
-                    this.$router.replace('/login').catch(err => { console.log(err) })
+                    this.$router.push('/login').catch((err) => {});
                 })
         },
     };

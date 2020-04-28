@@ -222,7 +222,6 @@
                         res.push(curDataset)
                     }
                 }
-                console.log(res)
                 this.chart.data.datasets = res
             },
             generateOptions() {

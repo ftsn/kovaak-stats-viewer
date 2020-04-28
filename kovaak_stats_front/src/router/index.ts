@@ -9,7 +9,7 @@ const ifNotAuthenticated = (to, from, next) => {
         next()
         return
     }
-    next('/')
+    next('/dashboard')
 }
 
 const ifAuthenticated = (to, from, next) => {
@@ -35,10 +35,8 @@ const routes = [
     {
         path: '/',
         name: 'home',
-        components: {
-            default: Home,
-            sidebar: Sidebar
-        }
+        component: Home,
+        beforeEnter: ifNotAuthenticated
     },
     {
         path: '/login',
