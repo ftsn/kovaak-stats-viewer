@@ -238,7 +238,7 @@ class UserPasswordRecover(Resource):
         code = user.gen_recovery_code()
         if not code:
             api.abort(409, 'A code has already been sent in the last 10 minutes')
-        if send_email('noreply@kovaakstatsviewer.com', 'zarobrya@hotmail.fr',
+        if send_email('noreply@kovaakstatsviewer.com', user.email_addr,
                       'Recovery code kovaak stats viewer',
                       'The code to change your kovaak stats viewer password is {}'.format(code)) is False:
             user.recovery_code.delete()
