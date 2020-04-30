@@ -2,11 +2,9 @@ from kovaak_stats.app import db
 from kovaak_stats.utils.users import hash_pw
 from base64 import b64decode
 from bcrypt import checkpw
-from flask import current_app
 import binascii
 import datetime
 import jsonpatch
-import jwt
 
 
 class AuthenticationError(Exception):

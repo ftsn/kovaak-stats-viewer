@@ -2,7 +2,7 @@ import os
 import unittest
 import json
 from base64 import b64encode
-from flask import g
+from flask import g, current_app
 from kovaak_stats.app import create_app, db
 from kovaak_stats.models.user import User
 from kovaak_stats.models.right import Right
@@ -31,11 +31,14 @@ class TestCaseApi(unittest.TestCase):
             if os.path.isfile('./tests/app.conf'):
                 self.app.config.from_pyfile('../tests/app.conf')
             # Create our test user
-            user = User.create("toto", "toto@toto.com", "titi")
+            user = User.create(self.app.config.get('TEST_USER'),
+                               self.app.config.get('TEST_USERS_EMAIL'),
+                               self.app.config.get('TEST_USERS_PASSWORD'))
             for right_name in rights:
                 user.rights.append(Right.create(right_name))
             db.session.add(user)
-            self._basic = b64encode('{0}:{1}'.format('toto', 'titi').encode('utf8')).decode('utf8')
+            self._basic = b64encode('{0}:{1}'.format(self.app.config.get('TEST_USER'),
+                                                     self.app.config.get('TEST_USERS_PASSWORD')).encode('utf8')).decode('utf8')
             g.current_user = None
             db.session.commit()
 
@@ -44,7 +47,7 @@ class TestCaseApi(unittest.TestCase):
         with self.app.app_context():
             if os.path.isfile('./tests/app.conf'):
                 self.app.config.from_pyfile('../tests/app.conf')
-            user = User.from_db('toto')
+            user = User.from_db(self.app.config.get('TEST_USER'))
             if user:
                 user.delete()
             db.session.remove()

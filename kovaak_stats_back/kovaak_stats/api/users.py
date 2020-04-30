@@ -5,7 +5,7 @@ from kovaak_stats.models.user import User
 from kovaak_stats.utils import get_current_user
 from kovaak_stats.utils.users import hash_pw
 from jsonpointer import JsonPointerException
-from kovaak_stats.utils import right_needed, Timestamp
+from kovaak_stats.utils import right_needed, Timestamp, send_email
 from kovaak_stats.utils.users import format_users_stats
 from werkzeug.datastructures import FileStorage
 from datetime import datetime
@@ -238,7 +238,13 @@ class UserPasswordRecover(Resource):
         code = user.gen_recovery_code()
         if not code:
             api.abort(409, 'A code has already been sent in the last 10 minutes')
-        return {'code': code}, 200
+        if send_email('noreply@kovaakstatsviewer.com', 'zarobrya@hotmail.fr',
+                      'Recovery code kovaak stats viewer',
+                      'The code to change your kovaak stats viewer password is {}'.format(code)) is False:
+            user.recovery_code.delete()
+            db.session.commit()
+            api.abort(400, 'Couldn\'t send an email with the code')
+        return '', 204
 
     @api.doc(description='Change the password of the user if the recovery code is correct')
     @api.expect(password_recovery_parser)
@@ -315,4 +321,3 @@ class UserStats(Resource):
                 api.abort(400, e)
         db.session.commit()
         return '', 204
-

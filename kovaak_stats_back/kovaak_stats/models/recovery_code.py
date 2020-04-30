@@ -22,6 +22,9 @@ class RecoveryCode(db.Model):
         db.session.add(recovery_code)
         return recovery_code
 
+    def delete(self):
+        db.session.delete(self)
+
     @classmethod
     def from_db(cls, value, user_id):
         return cls.query.filter_by(value=value, user_id=user_id).first()

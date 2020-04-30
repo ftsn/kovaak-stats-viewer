@@ -173,15 +173,17 @@ class TestApiUsers(TestCaseApi):
     def test_users_full_password_change(self):
         """Test to change the password of the user toto"""
         status, data = self.get('/api/users/toto/recover')
-        code = data['code']
-        self.assertEqual(status, 200)
+        with self.app.app_context():
+            user = User.from_db(self.app.config.get('TEST_USER'))
+            code = user.recovery_code.value
+        self.assertEqual(status, 204)
 
         status, data = self.post('/api/users/toto/recover', {'recovery_code': code,
                                                              'new_password': '123456'})
         self.assertEqual(status, 204)
 
     def test_users_full_password_change_with_code_renewing(self):
-        """Test to change the password of the user toto while waiting for the 1st code to expire"""
+        """Test to change the password of the user toto after the 1st code has expired"""
         status, data = self.get('/api/users/toto/recover')
         with app.app_context():
             user = User.from_db('toto')
@@ -190,7 +192,9 @@ class TestApiUsers(TestCaseApi):
             db.session.commit()
 
         status, data = self.get('/api/users/toto/recover')
-        code = data['code']
+        with self.app.app_context():
+            user = User.from_db(self.app.config.get('TEST_USER'))
+            code = user.recovery_code.value
 
         status, data = self.post('/api/users/toto/recover', {'recovery_code': code,
                                                              'new_password': '123456'})
@@ -205,7 +209,9 @@ class TestApiUsers(TestCaseApi):
     def test_users_change_password_expired_code(self):
         """Test to change the password of the user toto but provide an expired code"""
         status, data = self.get('/api/users/toto/recover')
-        code = data['code']
+        with self.app.app_context():
+            user = User.from_db(self.app.config.get('TEST_USER'))
+            code = user.recovery_code.value
         with app.app_context():
             user = User.from_db('toto')
             delta = datetime.timedelta(minutes=self.app.config.get('RECOVERY_CODE_DURATION'))
