@@ -291,8 +291,8 @@ class UserStats(Resource):
         try:
             start = datetime.fromtimestamp(int(args.start)) if args.start else datetime.fromtimestamp(0)
             end = datetime.fromtimestamp(int(args.end)) if args.end else datetime.fromtimestamp(2147483647)
-        except TypeError:
-            api.abort(400, "Invalid value, a timestamp is expected")
+        except ValueError:
+            api.abort(400, "Invalid value, a timestamp in seconds is expected")
         from kovaak_stats.models.stat import Stat
         if args.scenarii:
             stats = Stat.query.filter_by(user_id=user.id).filter(Stat.scenario.in_(args.scenarii),
@@ -319,5 +319,7 @@ class UserStats(Resource):
                 Stat.create(file, user)
             except ValueError as e:
                 api.abort(400, e)
+            except IndexError as e:
+                api.abort(400, 'Wrong file format')
         db.session.commit()
         return '', 204

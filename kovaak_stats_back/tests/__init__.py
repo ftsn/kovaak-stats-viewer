@@ -53,7 +53,7 @@ class TestCaseApi(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def get(self, endpoint, authorization=None, headers={}):
+    def get(self, endpoint, authorization=None, headers={}, data={}):
         if authorization:
             if authorization != 'noauth':
                 headers['Authorization'] = authorization
@@ -62,7 +62,7 @@ class TestCaseApi(unittest.TestCase):
         headers['Accept'] = 'application/javascript'
 
         with self.app.app_context():
-            rv = self.app.test_client().get(endpoint, headers=headers)
+            rv = self.app.test_client().get(endpoint, headers=headers, query_string=data)
         status = int(rv.status.split(' ')[0])
         if rv.data:
             return status, json.loads(rv.data.decode('utf8'))

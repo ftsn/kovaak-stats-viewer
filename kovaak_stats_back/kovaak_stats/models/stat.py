@@ -50,10 +50,8 @@ class Stat(db.Model):
         stat = cls()
         lines = file.read().decode('utf-8').splitlines()
         stat.filename = file.filename
-        try:
-            stat.execution_date = gen_execution_date(stat.filename)
-        except IndexError:
-            return None
+        stat.execution_date = gen_execution_date(stat.filename)
+
         stat.kills_info = gen_kills_info(lines)
         stat.weapon, stat.shots, stat.hits, stat.damage_done, stat.damage_possible = gen_dmg_info(lines)
         (stat.kills, stat.deaths, stat.fight_time, stat.avg_ttk, stat.damage_taken, stat.midairs, stat.midaired,
