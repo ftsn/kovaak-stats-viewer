@@ -1,5 +1,6 @@
 from kovaak_stats.app import db
 import datetime
+import re
 
 
 class Stat(db.Model):
@@ -49,7 +50,7 @@ class Stat(db.Model):
     def create(cls, file, user):
         stat = cls()
         lines = file.read().decode('utf-8').splitlines()
-        stat.filename = file.filename
+        stat.filename = re.split('|'.join(map(re.escape, ['/', '\\'])), file.filename)[-1]
         stat.execution_date = gen_execution_date(stat.filename)
 
         stat.kills_info = gen_kills_info(lines)

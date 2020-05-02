@@ -98,7 +98,7 @@ def subparser_install(subparser):
     )
     parser_upload_stats.set_defaults(func=users_upload_stats)
     parser_upload_stats.add_argument('user', type=check_user, help='The username')
-    parser_upload_stats.add_argument('files', help='The files', nargs='*')
+    parser_upload_stats.add_argument('files', help='The files', nargs='+')
 
 
 def create_user(username, email_addr, password, **kwargs):
