@@ -319,7 +319,7 @@ class TestApiUsers(TestCaseApi):
             content_type='text/csv',
         )
         status, data = self.post('{}/{}/{}'.format(USERS_URL, 'stats_user', 'stats'), {'files': file})
-        self.assertEqual(status, 204)
+        self.assertEqual(status, 403)
         status, data = self.get('{}/{}/{}'.format(USERS_URL, 'stats_user', 'stats'))
         self.assertEqual(status, 403)
 
