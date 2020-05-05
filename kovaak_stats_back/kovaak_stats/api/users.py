@@ -268,6 +268,7 @@ class UserPasswordRecover(Resource):
 
 upload_parser = api.parser()
 upload_parser.add_argument('files', location='files', type=FileStorage, required=True, action='append')
+upload_parser.add_argument('silent_fail', type=bool)
 
 get_stats_parser = api.parser()
 get_stats_parser.add_argument('scenarii', help='Will only return the stats for these scenarii', action='append')
@@ -276,7 +277,7 @@ get_stats_parser.add_argument('end', help='Won\'t return any stats for sessions 
 
 
 @api.route('/<username>/stats')
-class UserStats(Resource):
+class UserStats(UserRestResource):
     @api.doc(description='Return the stats associated to a certain user')
     @api.expect(get_stats_parser)
     @api.response(200, "Everything worked.")
@@ -313,13 +314,17 @@ class UserStats(Resource):
         user = User.from_db(username)
         if not user:
             api.abort(404, 'No such user')
+        if not get_current_user().has_right('stats.upload') and get_current_user().name != username:
+            api.abort(403, 'You don\'t have the proper right or try to upload some stats to someone else\'s account')
         from kovaak_stats.models.stat import Stat
         for file in args.files:
             try:
                 Stat.create(file, user)
             except ValueError as e:
-                api.abort(400, e)
+                if args.silent_fail is None:
+                    api.abort(400, e)
             except IndexError as e:
-                api.abort(400, 'Wrong file format')
+                if args.silent_fail is None:
+                    api.abort(400, 'Wrong file format')
         db.session.commit()
         return '', 204
