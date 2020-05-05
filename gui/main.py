@@ -44,7 +44,7 @@ def upload_btn_clicked():
         if start <= timestamp_cur <= end:
             payload.append(('files', (cur_file, open(cur_file, 'rb'), 'text/csv')))
     if len(payload):
-        res = requests.post('{}/{}/stats'.format('http://0.0.0.0:9999/api/users', username_input.get()), files=payload,
+        res = requests.post('{}/{}/stats'.format('http://127.0.0.1:9999/api/users', username_input.get()), files=payload,
                             data={'silent_fail': False}, auth=(username_input.get(), password_input.get()))
         if res.status_code == 204:
             messagebox.showinfo('Error', '{} file(s) uploaded'.format(len(payload)))
