@@ -36,10 +36,14 @@ def upload_btn_clicked():
 
     payload = []
     for cur_file in to_upload:
-        splitted = cur_file.split(' ')
-        splitted_raw_datetime = splitted[len(splitted) - 2].split('-')
-        formatted = '{} {}'.format(splitted_raw_datetime[0].replace('.', '-'),
-                                   splitted_raw_datetime[1].replace('.', ':'))
+        try:
+            splitted = cur_file.split(' ')
+            splitted_raw_datetime = splitted[len(splitted) - 2].split('-')
+            formatted = '{} {}'.format(splitted_raw_datetime[0].replace('.', '-'),
+                                       splitted_raw_datetime[1].replace('.', ':'))
+        except IndexError:
+            messagebox.showerror('Error', 'Can\'t get the execution date of the scenario, verify your stats directory')
+            return
         timestamp_cur = datetime.datetime.timestamp(datetime.datetime.strptime(formatted, '%Y-%m-%d %H:%M:%S'))
         if start <= timestamp_cur <= end:
             payload.append(('files', (cur_file, open(cur_file, 'rb'), 'text/csv')))
