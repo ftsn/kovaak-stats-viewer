@@ -2,7 +2,7 @@
 
 API:  
 [![Build Status](https://travis-ci.org/ftsn/kovaak-stats-viewer.svg?branch=master)](https://travis-ci.org/ftsn/kovaak-stats-viewer)
-
+ 
 # How to run with virtualenv :
 
 ## Setting the working environment
