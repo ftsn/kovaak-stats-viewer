@@ -22,7 +22,7 @@ setup(
         'jsonpatch',
         'jsonpointer',
         'pyjwt',
-        'Werkzeug==0.16.1',
+        'Werkzeug==2.2.3',
         'oauth2client'
     ],
     include_package_data=True,
